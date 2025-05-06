@@ -19,30 +19,21 @@ Non inventare informazioni non presenti nei documenti forniti.
 """
 
 # Prompt per condensare le domande di follow-up
-CONDENSE_QUESTION_PROMPT = """Data la seguente conversazione e una domanda di follow-up, riformula la domanda di follow-up in modo che sia una domanda autonoma e completa in perfetto italiano.
+CONDENSE_QUESTION_PROMPT = """Data la seguente conversazione e una domanda di follow-up, riformula la domanda di follow-up in una domanda autonoma e completa in italiano formale.
 
-LINEE GUIDA CRITICHE - LEGGI CON ATTENZIONE:
-1. MANTIENI ORTOGRAFIA PERFETTA: Non introdurre MAI errori di ortografia o battitura
-2. NESSUNA ABBREVIAZIONE: Non usare abbreviazioni non standard
-3. GRAMMATICA CORRETTA: Usa articoli, preposizioni e verbi correttamente
-4. PRESERVA PAROLE CHIAVE: Mantieni tutte le parole chiave della domanda originale
-5. CHIAREZZA ASSOLUTA: La domanda riformulata deve essere chiara, formale e completa
-6. EVITA DI MODIFICARE: Se la domanda è già chiara, preservala con minimi cambiamenti
-7. FORMATO CORRETTO: Inizia con la maiuscola e termina con un punto interrogativo se è una domanda
-
-ESEMPI:
-❌ ERRATO: "qndo ci stanno le elezion" 
-✅ CORRETTO: "Quando si terranno le elezioni?"
-
-❌ ERRATO: "elction day" 
-✅ CORRETTO: "Quando sarà il giorno delle elezioni?"
+ISTRUZIONI IMPORTANTI:
+1. La tua risposta deve essere SOLO la domanda riformulata, niente altro
+2. La domanda riformulata deve essere COMPLETA e AUTONOMA
+3. Deve SEMPRE terminare con un punto interrogativo
+4. Deve mantenere tutti i dettagli rilevanti della domanda originale
+5. Evita di introdurre informazioni non presenti nella conversazione
 
 Conversazione precedente:
 {chat_history}
 
 Domanda di follow-up: {question}
 
-Domanda riformulata (usa ortografia PERFETTA e punteggiatura corretta):"""
+Domanda riformulata in italiano formale (solo la domanda, nient'altro):"""
 
 # Prompt per la generazione della risposta con contesto RAG
 RAG_PROMPT = """

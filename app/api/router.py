@@ -70,56 +70,29 @@ def get_rag_engine(session_memory: ConversationMemory = Depends(get_session_memo
 @router.post("/query", response_model=QueryResponse)
 async def query(request: QueryRequest, rag_engine: RAGEngine = Depends(get_rag_engine)):
     """Process a user query and return a response."""
-    logger.info("Received query request", query=request.query, session_id=request.session_id, history_len=len(request.conversation_history or []))
-
-    # Ensure the RAG engine uses the correct session memory and loads client history
-    # The get_rag_engine dependency should now provide an engine with the right memory object
-    # if session_id was correctly passed to get_session_memory implicitly by FastAPI's DI
-    # However, get_session_memory needs the session_id. Let's adjust get_rag_engine or how session_id is passed.
-
-    # Simplification: The endpoint is responsible for ensuring its session_memory is used.
-    # We need to get session_memory based on request.session_id explicitly here.
+    logger.info(f"Received query: '{request.query}', session_id: {request.session_id}")
+    
+    # Ottieni la memoria specifica per questa sessione
     current_session_memory = get_session_memory(request.session_id)
     
-    # Load client history into this session's memory
-    # The client sends the full history including the current user query as the last item if it was just added.
-    # The load_history method is designed to build pairs.
-    # The conversationHistory from client also contains the *current* query at the end.
-    # We should load history *before* the current query is processed as new by RAGEngine.
+    # Log dello stato della memoria prima del caricamento
+    logger.info(f"Memory before loading history: {len(current_session_memory.get_history())} exchanges")
+    
+    # Carica lo storico della conversazione
     if request.conversation_history:
-        # The client sends [{type:user, content:q1}, {type:assistant, content:a1}, {type:user, content:current_q_pending_ans}]
-        # load_history will pair up q1/a1. current_q_pending_ans will be a trailing user message.
+        logger.info(f"Loading {len(request.conversation_history)} items from client history")
         current_session_memory.load_history(request.conversation_history)
+        logger.info(f"Memory after loading: {len(current_session_memory.get_history())} exchanges")
     
-    # Initialize RAGEngine with this specific, potentially rehydrated memory
-    # This is a bit redundant if get_rag_engine is already supposed to do this.
-    # Let's ensure get_rag_engine gets session_id to pick the right memory for RAGEngine init.
-    # To do this, `get_session_memory` needs to be called with `request.session_id`
-    # This means `get_rag_engine` also needs access to `request.session_id` or the `QueryRequest` object.
-
-    # Revised dependency structure for get_rag_engine:
-    # Change get_rag_engine to accept session_id directly or make get_session_memory use request.session_id.
-    # For now, we'll re-initialize the engine's memory reference for clarity, assuming RAGEngine can accept it.
-    # This requires RAGEngine.__init__ to accept a memory argument.
-    rag_engine.memory = current_session_memory # Ensure RAGEngine uses the rehydrated memory
+    # Assicurati che RAGEngine usi questa memoria
+    rag_engine.memory = current_session_memory
     
-    # The RAGEngine's _initialization_failed flag should be checked.
-    if hasattr(rag_engine, '_initialization_failed') and rag_engine._initialization_failed:
-        logger.error("RAGEngine initialization failed, cannot process query.")
-        raise HTTPException(
-            status_code=500,
-            detail="Errore interno del server: impossibile inizializzare il motore RAG."
-        )
-
+    # Processa la query
     try:
-        # The RAGEngine.query method will use its self.memory, which we've now set.
-        # It does not need session_id or history passed directly if its self.memory is correct.
-        result = rag_engine.query(request.query) # RAGEngine.query should use its self.memory
+        result = rag_engine.query(request.query)
         return QueryResponse(**result)
-    
     except Exception as e:
-        logger.error("Error processing query", error=str(e), query=request.query)
-        # traceback.print_exc() # For more detailed server logs
+        logger.error(f"Error processing query: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Si è verificato un errore durante l'elaborazione della richiesta: {str(e)}"

@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     MEMORY_WINDOW_SIZE: int = Field(4, description="Number of conversation exchanges to keep in memory")
     
     # LLM Configuration
-    LLM_MODEL: str = Field("gpt-4-turbo", description="LLM model to use")
+    LLM_MODEL: str = Field("gpt-4.1", description="LLM model to use")
     EMBEDDING_MODEL: str = Field("text-embedding-3-large", description="Embedding model to use")
     
     # Miscellaneous

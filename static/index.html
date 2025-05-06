@@ -414,7 +414,12 @@
     window.debugMode = false; // Set to true to enable debug overlays
     
     // Variabili per la gestione della sessione
-    const sessionId = 'user_' + Math.random().toString(36).substring(2, 8);
+    let sessionId = localStorage.getItem('cri_session_id');
+    if (!sessionId) {
+      sessionId = 'user_' + Math.random().toString(36).substring(2, 8);
+      localStorage.setItem('cri_session_id', sessionId);
+    }
+    console.log("Using session ID:", sessionId);
     let isLoading = false;
     let conversationHistory = [];
     

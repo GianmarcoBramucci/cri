@@ -241,89 +241,59 @@ class RAGEngine:
 
     def _condense_question(self, question: str) -> str:
         """Condense a follow-up question using conversation history."""
-        # For first questions, don't attempt to condense
-        if not self.memory.is_follow_up_question():
-            return question
-            
-        # For very short questions, don't condense to avoid loss of context
-        if len(question.split()) <= 3:
-            logger.info("Question too short to risk condensation, using original")
+        # Se non c'è storia o la domanda è molto breve, non riformulare
+        if not self.memory.is_follow_up_question() or len(question.split()) <= 3:
+            logger.info("Skipping condensation: no history or question too short")
             return question
         
         try:
-            # Format chat history for the prompt
+            # Prepara la storia della conversazione per il prompt
             chat_history_str = ""
             history = self.memory.get_history()
             
-            # If history is empty, don't attempt condensation
             if not history:
-                logger.warning("No chat history available for condensation, using original question")
+                logger.warning("No chat history available, using original question")
                 return question
-                
-            for q, a in history:
+            
+            # Usa solo le ultime 3 coppie di scambi per evitare token eccessivi
+            recent_history = history[-3:]
+            for q, a in recent_history:
                 chat_history_str += f"User: {q}\nAssistant: {a}\n\n"
             
-            # Use a much lower temperature specifically for question condensation
+            logger.info(f"Using {len(recent_history)} recent exchanges for condensation")
+            
+            # Imposta una temperatura più bassa per risposte più deterministiche
             condensation_llm = OpenAI(
                 model=settings.LLM_MODEL,
                 api_key=settings.OPENAI_API_KEY,
-                temperature=0.0,  # Zero temperature for deterministic output
-                system_prompt="Sei un assistente specializzato nella riformulazione di domande in italiano. Il tuo compito è esclusivamente riformulare domande di follow-up in domande autonome e complete. Mantieni SEMPRE l'ortografia corretta della lingua italiana. NON introdurre errori ortografici o grammaticali. Assicurati che la domanda sia chiara e ben formata."
+                temperature=0.0,
+                system_prompt="Sei un assistente specializzato nella riformulazione di domande in italiano. Riformula la domanda di follow-up in una domanda autonoma, completa e chiara. Mantieni l'ortografia corretta. La domanda riformulata DEVE essere una frase completa e grammaticalmente corretta."
             )
             
-            # Log chat history being used for context
-            logger.info("Using chat history for question condensation", 
-                      chat_history=chat_history_str,
-                      history_length=len(history))
-            
-            # Use a more explicit prompt
+            # Usa il prompt di condensazione
             prompt_content = self.condense_question_prompt.format(
                 chat_history=chat_history_str, 
                 question=question
             )
             
             messages = [
-                ChatMessage(
-                    role=MessageRole.SYSTEM,
-                    content="Sei un assistente specializzato nella riformulazione accurata di domande in italiano. Mantieni l'ortografia perfetta."
-                ),
-                ChatMessage(
-                    role=MessageRole.USER,
-                    content=prompt_content
-                )
+                ChatMessage(role=MessageRole.SYSTEM, content="Riformula la domanda in modo chiaro e completo."),
+                ChatMessage(role=MessageRole.USER, content=prompt_content)
             ]
             
-            # If reformulation fails in any way, use the original question
-            try:
-                response = condensation_llm.chat(messages)
-                condensed_question = response.message.content.strip()
-                
-                # Additional safety check - if output looks suspicious or too short, use original
-                if not condensed_question or len(condensed_question) < 5:
-                    logger.warning("Condensed question is too short, using original")
-                    return question
-                
-                logger.info("Condensed follow-up question", 
-                          original=question, 
-                          condensed=condensed_question)
-                
-                # Validate the condensed question before returning
-                validated_question = self._validate_condensed_question(question, condensed_question)
-                
-                if validated_question != condensed_question:
-                    logger.warning("Condensed question failed validation, using original or fixed version",
-                                   original=question,
-                                   invalid_condensed=condensed_question,
-                                   validated=validated_question)
-                
-                return validated_question
-            except Exception as e:
-                logger.error(f"Error in LLM chat for condensation: {str(e)}")
+            response = condensation_llm.chat(messages)
+            condensed_question = response.message.content.strip()
+            
+            # Validazione basilare
+            if len(condensed_question) < 10 or "?" not in condensed_question:
+                logger.warning("Condensed question seems invalid, using original")
                 return question
             
+            logger.info(f"Successfully condensed question: '{question}' → '{condensed_question}'")
+            return condensed_question
+            
         except Exception as e:
-            logger.error("Failed to condense question", error=str(e))
-            # Fall back to the original question if condensing fails
+            logger.error(f"Error condensing question: {str(e)}")
             return question
     
     def query(self, question: str) -> Dict[str, Any]:
