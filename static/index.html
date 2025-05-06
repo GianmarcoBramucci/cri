@@ -471,6 +471,14 @@
         removeChatLoader();
         
         if (response.ok) {
+          // Log dei documenti utilizzati nella console
+          console.log("Connessione al database riuscita!");
+          console.log("Documenti utilizzati per generare la risposta:", data.source_documents);
+          
+          if (data.condensed_question) {
+            console.log("Domanda riformulata:", data.condensed_question);
+          }
+          
           // Aggiungi la risposta dell'assistente alla chat
           addMessage(data.answer);
         } else {

@@ -32,7 +32,15 @@ logger = get_logger(__name__)
 
 
 class RAGEngine:
-    """RAG Engine for the CroceRossa Qdrant Cloud application."""
+    """RAG Engine for the CroceRossa Qdrant Cloud application.
+    
+    This class handles:
+    1. Connection to Qdrant Cloud
+    2. Retrieval of relevant documents
+    3. Reranking of results using Cohere
+    4. Generation of responses using the LLM
+    5. Conversation memory management
+    """
     
     def __init__(self):
         """Initialize the RAG engine with the required components."""
@@ -84,11 +92,12 @@ class RAGEngine:
                 api_key=settings.QDRANT_API_KEY
             )
             
-            # Set up QdrantVectorStore with correct content field
+            # Set up QdrantVectorStore with custom parameters
+            # Imposta content_payload_key come None per evitare l'assunzione di un campo specifico
             vector_store = QdrantVectorStore(
                 client=self.qdrant_client,
                 collection_name=settings.QDRANT_COLLECTION,
-                content_payload_key="page_content"  # <-- Qui è il fix principale!
+                content_payload_key=None  # Ignora il campo del contenuto predefinito
             )
             
             # Create vector store index
@@ -107,12 +116,15 @@ class RAGEngine:
             logger.info("Qdrant and retrievers initialized successfully")
             
         except Exception as e:
-            logger.error("Failed to initialize Qdrant", error=str(e), stack_trace=traceback.format_exc())
+            logger.error("Failed to initialize Qdrant", error=str(e))
             raise
     
-    def _direct_search(self, query: str) -> List[TextNode]:
+    def _direct_search(self, query: str) -> List[Dict]:
         """
-        Esegue una ricerca diretta su Qdrant in caso di fallimento del retriever standard.
+        Esegue una ricerca diretta su Qdrant, bypassando LlamaIndex.
+        
+        Questa funzione è utile quando la struttura dei dati in Qdrant
+        non è compatibile con le aspettative di LlamaIndex.
         """
         try:
             # Ottieni l'embedding per la query
@@ -135,16 +147,29 @@ class RAGEngine:
             # Converti i risultati in nodi di testo
             nodes = []
             for point in results:
+                # Estrai il payload
                 if not hasattr(point, 'payload') or not point.payload:
                     continue
-                
+                    
                 payload = point.payload
                 
-                # Usa page_content come campo di testo
-                if 'page_content' in payload and payload['page_content']:
+                # Determina quale campo usare come testo
+                # Prova prima 'content', poi 'testo', poi 'documento'
+                text_content = None
+                for field in ['content', 'testo', 'documento', 'description', 'text']:
+                    if field in payload and payload[field]:
+                        text_content = payload[field]
+                        break
+                
+                # Se non è stato trovato nessun campo di testo, unisci tutti i campi
+                if text_content is None:
+                    text_content = "\n".join([f"{k}: {v}" for k, v in payload.items() if v])
+                
+                # Crea il nodo di testo
+                if text_content:
                     node = TextNode(
-                        text=payload['page_content'],
-                        metadata=payload.get('metadata', {})
+                        text=text_content,
+                        metadata=payload
                     )
                     nodes.append(node)
             
@@ -155,7 +180,15 @@ class RAGEngine:
             return []
     
     def _condense_question(self, question: str) -> str:
-        """Condense a follow-up question using conversation history."""
+        """Condense a follow-up question using conversation history.
+        
+        Args:
+            question: The current user question
+            
+        Returns:
+            The condensed standalone question
+        """
+        # If there's no conversation history, return the original question
         if not self.memory.is_follow_up_question():
             return question
         
@@ -192,7 +225,14 @@ class RAGEngine:
             return question
     
     def query(self, question: str) -> Dict[str, Any]:
-        """Process a user query and generate a response."""
+        """Process a user query and generate a response.
+        
+        Args:
+            question: The user's question
+            
+        Returns:
+            Dict containing the answer and metadata
+        """
         logger.info("Processing query", question=question)
         
         try:
@@ -209,18 +249,9 @@ class RAGEngine:
             # Condense the question if it's a follow-up
             condensed_question = self._condense_question(question)
             
-            # Tenta prima con il retriever standard
-            try:
-                retrieved_nodes = self.retriever.retrieve(condensed_question)
-                valid_nodes = [node for node in retrieved_nodes if hasattr(node, 'text') and node.text]
-            except Exception as e:
-                logger.warning(f"Standard retriever failed, falling back to direct search: {str(e)}")
-                valid_nodes = []
+            # Usa la ricerca diretta invece di LlamaIndex retriever
+            valid_nodes = self._direct_search(condensed_question)
             
-            # Se non abbiamo risultati validi, prova con la ricerca diretta
-            if not valid_nodes:
-                valid_nodes = self._direct_search(condensed_question)
-                
             # Check if we have any valid results
             if not valid_nodes:
                 logger.warning("No valid documents retrieved", question=condensed_question)
@@ -255,16 +286,11 @@ class RAGEngine:
             # Prepare source documents info
             source_docs = []
             for node in valid_nodes:
-                metadata = getattr(node, 'metadata', {}) or {}
-                
-                # Extract text preview safely
-                node_text = getattr(node, 'text', '')
-                text_preview = (node_text[:200] + "...") if node_text else "[Contenuto non disponibile]"
-                
-                source_docs.append({
-                    "text": text_preview,
-                    "metadata": metadata
-                })
+                if hasattr(node, 'metadata') and node.metadata:
+                    source_docs.append({
+                        "text": node.text[:200] + "...",  # Truncate for brevity
+                        "metadata": node.metadata
+                    })
             
             logger.info("Query processed successfully")
             
@@ -293,9 +319,13 @@ class RAGEngine:
             logger.error("Error resetting memory", error=str(e))
     
     def get_transcript(self) -> List[Dict[str, str]]:
-        """Get the conversation transcript."""
+        """Get the conversation transcript.
+        
+        Returns:
+            List of dictionaries with user questions and assistant answers
+        """
         try:
             return self.memory.get_transcript()
         except Exception as e:
             logger.error("Error getting transcript", error=str(e))
-            return []
+            return []z
