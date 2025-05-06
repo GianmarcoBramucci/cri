@@ -34,9 +34,11 @@ logger = get_logger(__name__)
 class RAGEngine:
     """RAG Engine for the CroceRossa Qdrant Cloud application."""
     
-    def __init__(self):
-        """Initialize the RAG engine with the required components."""
-        logger.info("Initializing RAG Engine")
+    def __init__(self, memory: ConversationMemory):
+        """Initialize the RAG engine with the required components and a specific memory instance."""
+        logger.info("Initializing RAG Engine with provided memory instance")
+        self._initialization_failed = False # Initialize the flag
+        self.memory = memory # Use the provided session-specific memory instance
         
         try:
             # Set the global LlamaIndex settings
@@ -52,9 +54,6 @@ class RAGEngine:
                 api_key=settings.OPENAI_API_KEY,
             )
             
-            # Initialize conversation memory
-            self.memory = ConversationMemory()
-            
             # Connect to Qdrant
             self._initialize_qdrant()
             
@@ -66,8 +65,6 @@ class RAGEngine:
             logger.info("RAG Engine initialization complete")
         except Exception as e:
             logger.error("Failed to initialize RAG Engine", error=str(e))
-            # Initialize memory to avoid NoneType errors in other methods
-            self.memory = ConversationMemory()
             # Set flag to indicate initialization failure
             self._initialization_failed = True
     
@@ -154,37 +151,175 @@ class RAGEngine:
             logger.error("Error in direct search", error=str(e), stack_trace=traceback.format_exc())
             return []
     
+    def _validate_condensed_question(self, original: str, condensed: str) -> str:
+        """Validate the condensed question to ensure it meets quality standards."""
+        # Check if condensed question is empty or too short
+        if not condensed or len(condensed) < 5:
+            logger.warning("Condensed question too short or empty, using original")
+            return original
+            
+        # Simple dictionary check for common Italian words to detect typos
+        common_italian_words = ["elezioni", "maggio", "quando", "dove", "come", "giorno", "giornata", 
+                                "elettorale", "votazioni", "voto", "urne", "seggio", "candidati", 
+                                "croce", "rossa", "italiana", "nella", "sono", "stanno", "prossime"]
+        
+        # Check if specific words appear with typos
+        words = condensed.split()
+        for word in words:
+            word_lower = word.lower().strip(",.?!;:")
+            # Skip very short words
+            if len(word_lower) <= 2:
+                continue
+                
+            # Check if it's a common word with slight typos
+            for common_word in common_italian_words:
+                # If words are similar but not exact (likely typo)
+                if word_lower != common_word and self._similar_words(word_lower, common_word, max_distance=2):
+                    logger.warning(f"Possible typo detected: '{word_lower}' might be '{common_word}', using original question")
+                    return original
+                    
+        # Check if condensed question contains obvious errors or typos (single letter words that aren't valid)
+        suspicious_words = [w for w in words if len(w) == 1 and w.lower() not in ['a', 'e', 'è', 'o', 'i']]
+        if suspicious_words:
+            logger.warning(f"Suspicious single-letter words in condensed question: {suspicious_words}, using original")
+            return original
+            
+        # Check for excessive typos (words with 4+ consonants in a row)
+        consonants = "bcdfghjklmnpqrstvwxyz"
+        for word in words:
+            consonant_count = 0
+            for char in word.lower():
+                if char in consonants:
+                    consonant_count += 1
+                else:
+                    consonant_count = 0
+                if consonant_count >= 4:
+                    logger.warning(f"Possible typo detected in condensed question: {word}, using original")
+                    return original
+                    
+        # Count vowels - Italian words should have vowels
+        vowels = "aeiouàèéìòù"
+        all_vowels = sum(1 for char in condensed.lower() if char in vowels)
+        if len(condensed) > 10 and all_vowels < len(condensed) * 0.2:  # Less than 20% vowels
+            logger.warning(f"Question has too few vowels for Italian text: {condensed}, using original")
+            return original
+        
+        # Everything looks good
+        return condensed
+        
+    def _similar_words(self, word1: str, word2: str, max_distance: int = 2) -> bool:
+        """Check if two words are similar using Levenshtein distance."""
+        # Basic implementation of Levenshtein distance
+        if abs(len(word1) - len(word2)) > max_distance:
+            return False
+            
+        if len(word1) > 3 and len(word2) > 3:
+            # For longer words, check if they start with the same characters
+            prefix_len = min(3, min(len(word1), len(word2)))
+            if word1[:prefix_len] != word2[:prefix_len]:
+                return False
+                
+        # Calculate Levenshtein distance
+        m, n = len(word1), len(word2)
+        dp = [[0 for _ in range(n+1)] for _ in range(m+1)]
+        
+        for i in range(m+1):
+            dp[i][0] = i
+        for j in range(n+1):
+            dp[0][j] = j
+            
+        for i in range(1, m+1):
+            for j in range(1, n+1):
+                cost = 0 if word1[i-1] == word2[j-1] else 1
+                dp[i][j] = min(
+                    dp[i-1][j] + 1,      # deletion
+                    dp[i][j-1] + 1,      # insertion
+                    dp[i-1][j-1] + cost  # substitution
+                )
+        
+        return dp[m][n] <= max_distance
+
     def _condense_question(self, question: str) -> str:
         """Condense a follow-up question using conversation history."""
+        # For first questions, don't attempt to condense
         if not self.memory.is_follow_up_question():
+            return question
+            
+        # For very short questions, don't condense to avoid loss of context
+        if len(question.split()) <= 3:
+            logger.info("Question too short to risk condensation, using original")
             return question
         
         try:
             # Format chat history for the prompt
             chat_history_str = ""
-            for q, a in self.memory.get_history():
+            history = self.memory.get_history()
+            
+            # If history is empty, don't attempt condensation
+            if not history:
+                logger.warning("No chat history available for condensation, using original question")
+                return question
+                
+            for q, a in history:
                 chat_history_str += f"User: {q}\nAssistant: {a}\n\n"
             
-            # Use LLM to condense the question
-            llm = LlamaIndexSettings.llm
+            # Use a much lower temperature specifically for question condensation
+            condensation_llm = OpenAI(
+                model=settings.LLM_MODEL,
+                api_key=settings.OPENAI_API_KEY,
+                temperature=0.0,  # Zero temperature for deterministic output
+                system_prompt="Sei un assistente specializzato nella riformulazione di domande in italiano. Il tuo compito è esclusivamente riformulare domande di follow-up in domande autonome e complete. Mantieni SEMPRE l'ortografia corretta della lingua italiana. NON introdurre errori ortografici o grammaticali. Assicurati che la domanda sia chiara e ben formata."
+            )
+            
+            # Log chat history being used for context
+            logger.info("Using chat history for question condensation", 
+                      chat_history=chat_history_str,
+                      history_length=len(history))
+            
+            # Use a more explicit prompt
+            prompt_content = self.condense_question_prompt.format(
+                chat_history=chat_history_str, 
+                question=question
+            )
+            
             messages = [
                 ChatMessage(
+                    role=MessageRole.SYSTEM,
+                    content="Sei un assistente specializzato nella riformulazione accurata di domande in italiano. Mantieni l'ortografia perfetta."
+                ),
+                ChatMessage(
                     role=MessageRole.USER,
-                    content=self.condense_question_prompt.format(
-                        chat_history=chat_history_str, 
-                        question=question
-                    )
+                    content=prompt_content
                 )
             ]
             
-            response = llm.chat(messages)
-            condensed_question = response.message.content
-            
-            logger.info("Condensed follow-up question", 
-                      original=question, 
-                      condensed=condensed_question)
-            
-            return condensed_question
+            # If reformulation fails in any way, use the original question
+            try:
+                response = condensation_llm.chat(messages)
+                condensed_question = response.message.content.strip()
+                
+                # Additional safety check - if output looks suspicious or too short, use original
+                if not condensed_question or len(condensed_question) < 5:
+                    logger.warning("Condensed question is too short, using original")
+                    return question
+                
+                logger.info("Condensed follow-up question", 
+                          original=question, 
+                          condensed=condensed_question)
+                
+                # Validate the condensed question before returning
+                validated_question = self._validate_condensed_question(question, condensed_question)
+                
+                if validated_question != condensed_question:
+                    logger.warning("Condensed question failed validation, using original or fixed version",
+                                   original=question,
+                                   invalid_condensed=condensed_question,
+                                   validated=validated_question)
+                
+                return validated_question
+            except Exception as e:
+                logger.error(f"Error in LLM chat for condensation: {str(e)}")
+                return question
             
         except Exception as e:
             logger.error("Failed to condense question", error=str(e))
@@ -192,12 +327,12 @@ class RAGEngine:
             return question
     
     def query(self, question: str) -> Dict[str, Any]:
-        """Process a user query and generate a response."""
-        logger.info("Processing query", question=question)
+        """Process a user query and generate a response using instance-specific memory."""
+        logger.info("Processing query with instance memory", question=question, memory_id=id(self.memory))
         
         try:
-            # Check if initialization failed
-            if hasattr(self, '_initialization_failed') and self._initialization_failed:
+            # Check if initialization failed (flag set in __init__)
+            if self._initialization_failed:
                 error_message = "Mi dispiace, si è verificato un errore durante l'inizializzazione del sistema. Contatta il supporto tecnico."
                 self.memory.add_exchange(question, error_message)
                 return {
@@ -249,7 +384,7 @@ class RAGEngine:
             
             response_text = LlamaIndexSettings.llm.complete(prompt).text
             
-            # Add to conversation memory
+            # Add to conversation memory (self.memory is now session-specific)
             self.memory.add_exchange(question, response_text)
             
             # Prepare source documents info
@@ -285,17 +420,23 @@ class RAGEngine:
             }
     
     def reset_memory(self) -> None:
-        """Reset the conversation memory."""
+        """Reset the conversation memory for the current session."""
         try:
-            self.memory.reset()
-            logger.info("Conversation memory reset")
+            if self.memory: # Check if memory object exists
+                self.memory.reset()
+                logger.info("Conversation memory reset for the current session", memory_id=id(self.memory))
+            else:
+                logger.warning("Attempted to reset memory, but no memory object was found on RAGEngine instance.")
         except Exception as e:
             logger.error("Error resetting memory", error=str(e))
     
     def get_transcript(self) -> List[Dict[str, str]]:
-        """Get the conversation transcript."""
+        """Get the conversation transcript for the current session."""
         try:
-            return self.memory.get_transcript()
+            if self.memory:
+                return self.memory.get_transcript()
+            logger.warning("Attempted to get transcript, but no memory object was found.")
+            return []
         except Exception as e:
             logger.error("Error getting transcript", error=str(e))
             return []

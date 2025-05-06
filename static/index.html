@@ -212,6 +212,32 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
+    /* Stile per le fonti */
+    .sources-info {
+      margin-top: 0.75rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(227, 0, 15, 0.1);
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .sources-info ul {
+      margin-top: 0.25rem;
+    }
+
+    .sources-info li {
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .sources-info i {
+      color: #e3000f;
+      margin-right: 0.375rem;
+      font-size: 0.7rem;
+      margin-top: 0.2rem;
+    }
+
     /* Stile per la trascrizione */
     .transcript-container {
       max-height: 400px;
@@ -266,6 +292,9 @@
               </button>
               <button id="transcriptBtn" class="btn-cri px-3 py-1 text-sm rounded-md flex items-center">
                 <i class="fas fa-list mr-1"></i> Trascrizione
+              </button>
+              <button id="debugBtn" class="px-3 py-1 text-sm rounded-md flex items-center bg-gray-200 hover:bg-gray-300">
+                <i class="fas fa-bug mr-1"></i> Debug
               </button>
             </div>
           </div>
@@ -381,9 +410,13 @@
       once: true
     });
     
+    // Debug mode toggle
+    window.debugMode = false; // Set to true to enable debug overlays
+    
     // Variabili per la gestione della sessione
     const sessionId = 'user_' + Math.random().toString(36).substring(2, 8);
     let isLoading = false;
+    let conversationHistory = [];
     
     // Elementi DOM
     const queryForm = document.getElementById('queryForm');
@@ -396,12 +429,13 @@
     const closeTranscriptBtn = document.getElementById('closeTranscriptBtn');
     const closeTranscriptBtn2 = document.getElementById('closeTranscriptBtn2');
     const contactInfo = document.getElementById('contactInfo');
+    const debugBtn = document.getElementById('debugBtn');
     
     // API base URL
     const API_BASE_URL = '/api';
     
     // Funzione per aggiungere un messaggio alla chat
-    function addMessage(text, isUser = false) {
+    function addMessage(text, isUser = false, sources = null) {
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('chat-message');
       messageDiv.classList.add(isUser ? 'user-message' : 'assistant-message');
@@ -409,6 +443,94 @@
       // Processa il markdown se è un messaggio dell'assistente
       if (!isUser) {
         messageDiv.innerHTML = marked.parse(text);
+        
+        // Aggiungi le fonti se disponibili
+        if (sources && sources.length > 0) {
+          const sourcesDiv = document.createElement('div');
+          sourcesDiv.classList.add('sources-info', 'mt-3', 'pt-2', 'border-t', 'border-gray-200', 'text-xs', 'text-gray-500');
+          
+          // Crea un header per le fonti con un pulsante per espandere/collassare
+          const sourcesHeader = document.createElement('div');
+          sourcesHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer');
+          sourcesHeader.innerHTML = `
+            <p class="font-semibold">Fonti:</p>
+            <button class="text-xs text-cri-red hover:text-cri-darkred" title="Mostra/Nascondi fonti">
+              <i class="fas fa-chevron-down toggle-icon"></i>
+            </button>
+          `;
+          sourcesDiv.appendChild(sourcesHeader);
+          
+          // Contenitore per la lista delle fonti (inizialmente nascosto)
+          const sourcesContent = document.createElement('div');
+          sourcesContent.classList.add('sources-content', 'hidden', 'mt-2');
+          sourcesDiv.appendChild(sourcesContent);
+          
+          const sourcesList = document.createElement('ul');
+          sourcesList.classList.add('pl-2');
+          
+          // Tieni traccia dei documenti già aggiunti per evitare duplicati
+          const addedSources = new Set();
+          
+          sources.forEach(source => {
+            if (source.metadata && source.metadata.filename) {
+              // Evita duplicati basati sul nome del file
+              if (!addedSources.has(source.metadata.filename)) {
+                addedSources.add(source.metadata.filename);
+                
+                const sourceItem = document.createElement('li');
+                sourceItem.classList.add('flex', 'items-start', 'mb-1');
+                
+                // Determina un titolo leggibile dal nome del file
+                let displayTitle = source.metadata.filename.replace('.md', '');
+                
+                // Se abbiamo un chunk_title, usiamo quello
+                if (source.metadata.chunk_title) {
+                  displayTitle = source.metadata.chunk_title;
+                }
+                
+                // Crea il tooltip con più informazioni sulla fonte
+                const tooltipInfo = [];
+                if (source.metadata.document_type) {
+                  tooltipInfo.push(`Tipo: ${source.metadata.document_type}`);
+                }
+                if (source.metadata.source) {
+                  tooltipInfo.push(`Percorso: ${source.metadata.source}`);
+                }
+                
+                const tooltipText = tooltipInfo.length > 0 ? tooltipInfo.join('\n') : 'Informazioni aggiuntive non disponibili';
+                
+                sourceItem.innerHTML = `
+                  <i class="fas fa-file-alt mr-1 mt-0.5 text-cri-red"></i>
+                  <span title="${tooltipText}">${displayTitle}</span>
+                `;
+                sourcesList.appendChild(sourceItem);
+              }
+            }
+          });
+          
+          // Aggiungi una riga che mostra quanti documenti sono stati consultati
+          const sourceCount = document.createElement('p');
+          sourceCount.classList.add('text-xs', 'text-gray-400', 'mt-1');
+          sourceCount.textContent = `${addedSources.size} ${addedSources.size === 1 ? 'documento consultato' : 'documenti consultati'}`;
+          
+          sourcesContent.appendChild(sourcesList);
+          sourcesContent.appendChild(sourceCount);
+          messageDiv.appendChild(sourcesDiv);
+          
+          // Aggiungi l'evento per espandere/collassare la sezione delle fonti
+          sourcesHeader.addEventListener('click', () => {
+            const content = sourcesHeader.parentElement.querySelector('.sources-content');
+            const icon = sourcesHeader.querySelector('.toggle-icon');
+            
+            if (content.classList.contains('hidden')) {
+              content.classList.remove('hidden');
+              icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            } else {
+              content.classList.add('hidden');
+              icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+            }
+          });
+        }
       } else {
         messageDiv.textContent = text;
       }
@@ -444,6 +566,7 @@
       
       // Aggiungi il messaggio dell'utente alla chat
       addMessage(query, true);
+      conversationHistory.push({ type: "user", content: query });
       
       // Pulisci l'input
       queryInput.value = '';
@@ -461,7 +584,8 @@
           },
           body: JSON.stringify({
             query: query,
-            session_id: sessionId
+            session_id: sessionId,
+            conversation_history: conversationHistory
           }),
         });
         
@@ -477,10 +601,43 @@
           
           if (data.condensed_question) {
             console.log("Domanda riformulata:", data.condensed_question);
+            
+            // Display condensed question in debug overlay if enabled
+            if (window.debugMode) {
+              const debugInfo = document.createElement('div');
+              debugInfo.classList.add('debug-overlay', 'p-2', 'my-1', 'text-xs', 'bg-gray-100', 'border', 'border-gray-300', 'rounded');
+              debugInfo.innerHTML = `
+                <div class="font-medium text-gray-700">Debug - Riformulazione:</div>
+                <div class="flex">
+                  <div class="font-mono mr-2">Originale:</div>
+                  <div class="text-gray-700">${query}</div>
+                </div>
+                <div class="flex">
+                  <div class="font-mono mr-2">Riformulata:</div>
+                  <div class="text-indigo-700">${data.condensed_question}</div>
+                </div>
+              `;
+              chatContainer.appendChild(debugInfo);
+              chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            // Richiedi la trascrizione per mostrare la memoria della conversazione
+            fetch(`${API_BASE_URL}/transcript`)
+              .then(response => response.json())
+              .then(transcriptData => {
+                if (transcriptData.transcript) {
+                  console.log("Memoria della conversazione utilizzata per la riformulazione:", 
+                    transcriptData.transcript.slice(0, -1)); // Mostra la conversazione precedente
+                }
+              })
+              .catch(error => {
+                console.error("Errore nel recupero della memoria della conversazione:", error);
+              });
           }
           
           // Aggiungi la risposta dell'assistente alla chat
-          addMessage(data.answer);
+          addMessage(data.answer, false, data.source_documents);
+          conversationHistory.push({ type: "assistant", content: data.answer });
         } else {
           // Gestione degli errori
           addMessage("Mi dispiace, si è verificato un errore. Riprova più tardi o contatta il supporto.");
@@ -516,6 +673,7 @@
         if (response.ok) {
           // Pulisci la chat
           chatContainer.innerHTML = '';
+          conversationHistory = [];
           
           // Aggiungi il messaggio di benvenuto
           addMessage("Ciao! Sono l'assistente virtuale della Croce Rossa Italiana. Come posso aiutarti oggi?");
@@ -640,6 +798,25 @@
           }, 2000);
         });
       }
+    });
+    
+    // Toggle della modalità debug
+    debugBtn.addEventListener('click', () => {
+      window.debugMode = !window.debugMode;
+      
+      // Aggiorna l'aspetto del pulsante
+      if (window.debugMode) {
+        debugBtn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+        debugBtn.classList.add('bg-indigo-500', 'text-white', 'hover:bg-indigo-600');
+      } else {
+        debugBtn.classList.remove('bg-indigo-500', 'text-white', 'hover:bg-indigo-600');
+        debugBtn.classList.add('bg-gray-200', 'hover:bg-gray-300');
+        
+        // Rimuovi i box di debug esistenti
+        document.querySelectorAll('.debug-overlay').forEach(el => el.remove());
+      }
+      
+      console.log("Modalità debug:", window.debugMode ? "attivata" : "disattivata");
     });
   </script>
 </body>

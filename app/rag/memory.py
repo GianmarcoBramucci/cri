@@ -63,6 +63,51 @@ class ConversationMemory:
         self.transcript = []
         logger.info("Conversation memory reset")
 
+    def load_history(self, history_items: List[Dict[str, str]]) -> None:
+        """Load conversation history from a list of message dictionaries.
+
+        This will overwrite the current memory and transcript.
+        Expected format for history_items:
+        [
+            { "type": "user", "content": "First user message" },
+            { "type": "assistant", "content": "First assistant response" },
+            ...
+        ]
+        """
+        self.memory.clear()
+        self.transcript = []  # Reset the full transcript as well
+
+        temp_question: Optional[str] = None
+        for item in history_items:
+            content = item.get("content")
+            msg_type = item.get("type")
+
+            if not content:  # Skip items with no content
+                continue
+
+            if msg_type == "user":
+                temp_question = content
+            elif msg_type == "assistant" and temp_question is not None:
+                # Both parts of an exchange are present
+                self.memory.append((temp_question, content))
+                self.transcript.append({"user": temp_question, "assistant": content})
+                temp_question = None  # Reset for the next pair
+            elif msg_type == "assistant" and temp_question is None:
+                # Assistant message without a preceding user message in this load batch
+                # This could happen if history starts with assistant or is malformed.
+                # We'll add it as an assistant message with a placeholder for the user.
+                # Or, more simply, only add complete pairs. For now, let's be strict.
+                logger.warning(f"Assistant message '{content[:50]}...' found without a preceding user message during history load. Skipping.")
+
+
+        if temp_question is not None:
+            # If there's a trailing user message, it means the assistant hasn't replied yet.
+            # This is fine, it will be the current question being processed.
+            # We don't add it to memory as an exchange yet.
+            logger.debug(f"Trailing user message '{temp_question[:50]}...' found in history load, will be current question.")
+
+        logger.info(f"Memory loaded with {len(self.memory)} exchanges and {len(self.transcript)} transcript entries from client history.")
+
     def is_follow_up_question(self) -> bool:
         """Check if there's any conversation history, indicating a follow-up question.
         

@@ -9,6 +9,10 @@ class QueryRequest(BaseModel):
     
     query: str = Field(..., description="The user's query about CRI")
     session_id: Optional[str] = Field(None, description="Optional session identifier")
+    conversation_history: Optional[List[Dict[str, str]]] = Field(
+        default_factory=list, 
+        description="Full conversation history from the client"
+    )
     
     class Config:
         json_schema_extra = {
