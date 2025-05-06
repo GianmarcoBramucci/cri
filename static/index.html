@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assistente Croce Rossa Italiana</title>
+  <!-- Bootstrap CSS (lasciato per compatibilità con il widget) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- AOS Animation Library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+  <!-- Marked.js per il parsing del Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cri: {
+              red: '#e3000f',
+              darkred: '#b80000',
+              lightred: '#ff3b4a',
+              gray: '#f2f2f2',
+              darkgray: '#333333',
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #fafafa;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e3000f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Effetto di parallax per l'header */
+    .parallax-header {
+      position: relative;
+      overflow: hidden;
+      height: 220px;
+      background: linear-gradient(135deg, #e3000f 0%, #b80000 100%);
+    }
+    
+    .parallax-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5z' fill='%23ffffff' fill-opacity='0.08'/%3E%3C/svg%3E");
+      opacity: 0.8;
+      z-index: 0;
+    }
+    
+    .parallax-header-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header-wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+      transform: rotate(180deg);
+    }
+
+    .header-wave svg {
+      position: relative;
+      display: block;
+      width: calc(100% + 1.3px);
+      height: 46px;
+    }
+
+    .header-wave .shape-fill {
+      fill: #FFFFFF;
+    }
+
+    .cri-red {
+      background-color: #e3000f;
+    }
+    
+    .cri-text-red {
+      color: #e3000f;
+    }
+
+    /* Animazione per il logo della Croce Rossa */
+    @keyframes pulse-subtle {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse-animation {
+      animation: pulse-subtle 3s infinite ease-in-out;
+    }
+    
+    /* Card con effetti avanzati */
+    .card-3d {
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(227, 0, 15, 0.1);
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+    
+    .card-3d:hover {
+      transform: translateY(-5px) translateZ(0);
+      box-shadow: 0 15px 35px rgba(227, 0, 15, 0.15);
+    }
+    
+    .card-header {
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      background: linear-gradient(to right, #f9f9f9, #ffffff);
+      padding: 1.25rem 1.5rem;
+    }
+    
+    /* Bottoni con effetti moderni */
+    .btn-cri {
+      background: linear-gradient(135deg, #e3000f 0%, #b80000 100%);
+      color: white;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(227, 0, 15, 0.3);
+      border: none;
+    }
+    
+    .btn-cri:hover {
+      background: linear-gradient(135deg, #ff3b4a 0%, #e3000f 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(227, 0, 15, 0.4);
+    }
+    
+    .btn-cri::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    .btn-cri:hover::after {
+      animation: ripple 1s ease-out;
+    }
+    
+    @keyframes ripple {
+      0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(20, 20);
+        opacity: 0;
+      }
+    }
+    
+    /* Input con effetti moderni */
+    .input-cri {
+      transition: all 0.3s ease;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .input-cri:focus {
+      border-color: #e3000f;
+      box-shadow: 0 0 0 4px rgba(227, 0, 15, 0.15);
+      outline: none;
+    }
+    
+    /* Chat message styling */
+    .chat-message {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      max-width: 85%;
+    }
+    
+    .user-message {
+      background-color: #f0f0f0;
+      margin-left: auto;
+      border-top-right-radius: 0;
+    }
+    
+    .assistant-message {
+      background-color: #fff;
+      border: 1px solid #eaeaea;
+      margin-right: auto;
+      border-top-left-radius: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Stile per la trascrizione */
+    .transcript-container {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+      width: 2rem;
+      height: 2rem;
+      border: 3px solid rgba(227, 0, 15, 0.2);
+      border-radius: 50%;
+      border-top-color: #e3000f;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header con effetto parallax -->
+  <header class="parallax-header">
+    <div class="parallax-header-content flex flex-col items-center justify-center h-full text-white">
+      <img src="https://cri.it/wp-content/uploads/2019/12/logo-cri-retina-e1575638240457.png" alt="Logo Croce Rossa Italiana" class="h-16 mb-4 pulse-animation">
+      <h1 class="text-3xl font-bold">Assistente Virtuale CRI</h1>
+      <p class="text-lg opacity-90">Supporto informativo della Croce Rossa Italiana</p>
+    </div>
+    <div class="header-wave">
+      <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill"></path>
+        <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
+        <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
+      </svg>
+    </div>
+  </header>
+  
+  <!-- Container principale -->
+  <main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Colonna principale - Chat -->
+      <div class="lg:col-span-2">
+        <div class="card-3d">
+          <div class="card-header flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-800">
+              <i class="fas fa-comment-dots mr-2 cri-text-red"></i>Assistente Virtuale
+            </h2>
+            <div class="flex space-x-2">
+              <button id="resetBtn" class="btn-cri px-3 py-1 text-sm rounded-md flex items-center">
+                <i class="fas fa-sync-alt mr-1"></i> Reset
+              </button>
+              <button id="transcriptBtn" class="btn-cri px-3 py-1 text-sm rounded-md flex items-center">
+                <i class="fas fa-list mr-1"></i> Trascrizione
+              </button>
+            </div>
+          </div>
+          <div class="p-4">
+            <div id="chatContainer" class="mb-4 min-h-[400px] max-h-[500px] overflow-y-auto p-2">
+              <!-- I messaggi della chat verranno aggiunti qui dinamicamente -->
+              <div class="chat-message assistant-message">
+                <p>Ciao! Sono l'assistente virtuale della Croce Rossa Italiana. Come posso aiutarti oggi?</p>
+              </div>
+            </div>
+            
+            <!-- Form per l'invio del messaggio -->
+            <form id="queryForm" class="flex items-end">
+              <div class="flex-grow">
+                <label for="queryInput" class="block text-sm font-medium text-gray-700 mb-1">La tua domanda</label>
+                <textarea id="queryInput" rows="2" class="input-cri w-full resize-none" placeholder="Scrivi qui la tua domanda..."></textarea>
+              </div>
+              <button type="submit" class="btn-cri ml-3 px-4 py-3 h-12 rounded-xl flex items-center">
+                <i class="fas fa-paper-plane mr-2"></i>
+                Invia
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Colonna laterale - Info -->
+      <div class="lg:col-span-1">
+        <!-- Card info contatti -->
+        <div class="card-3d mb-6" data-aos="fade-up" data-aos-delay="100">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-info-circle mr-2 cri-text-red"></i>Contatti CRI
+            </h3>
+          </div>
+          <div class="p-4" id="contactInfo">
+            <div class="flex justify-center items-center h-20">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Card link utili -->
+        <div class="card-3d" data-aos="fade-up" data-aos-delay="200">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-link mr-2 cri-text-red"></i>Link Utili
+            </h3>
+          </div>
+          <div class="p-4">
+            <ul class="space-y-3">
+              <li>
+                <a href="https://cri.it/" target="_blank" rel="noopener" class="flex items-center text-gray-700 hover:text-cri-red transition-colors">
+                  <i class="fas fa-external-link-alt mr-2 text-cri-red"></i>
+                  <span>Sito Ufficiale CRI</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://cri.it/diventa-volontario/" target="_blank" rel="noopener" class="flex items-center text-gray-700 hover:text-cri-red transition-colors">
+                  <i class="fas fa-user-plus mr-2 text-cri-red"></i>
+                  <span>Diventa Volontario</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://cri.it/sostienici/" target="_blank" rel="noopener" class="flex items-center text-gray-700 hover:text-cri-red transition-colors">
+                  <i class="fas fa-hand-holding-heart mr-2 text-cri-red"></i>
+                  <span>Sostienici</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://cri.it/emergenza-ucraina/" target="_blank" rel="noopener" class="flex items-center text-gray-700 hover:text-cri-red transition-colors">
+                  <i class="fas fa-first-aid mr-2 text-cri-red"></i>
+                  <span>Emergenze Umanitarie</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Modal per la trascrizione -->
+  <div id="transcriptModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+      <div class="border-b px-4 py-3 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800">
+          <i class="fas fa-list mr-2 cri-text-red"></i>Trascrizione della conversazione
+        </h3>
+        <button id="closeTranscriptBtn" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-4 transcript-container" id="transcriptContent">
+        <div class="flex justify-center items-center h-20">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+      <div class="border-t px-4 py-3 flex justify-end">
+        <button id="closeTranscriptBtn2" class="btn-cri px-4 py-2 rounded-md">
+          Chiudi
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Javascript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script>
+    // Inizializza le animazioni AOS
+    AOS.init({
+      duration: 800,
+      once: true
+    });
+    
+    // Variabili per la gestione della sessione
+    const sessionId = 'user_' + Math.random().toString(36).substring(2, 8);
+    let isLoading = false;
+    
+    // Elementi DOM
+    const queryForm = document.getElementById('queryForm');
+    const queryInput = document.getElementById('queryInput');
+    const chatContainer = document.getElementById('chatContainer');
+    const resetBtn = document.getElementById('resetBtn');
+    const transcriptBtn = document.getElementById('transcriptBtn');
+    const transcriptModal = document.getElementById('transcriptModal');
+    const transcriptContent = document.getElementById('transcriptContent');
+    const closeTranscriptBtn = document.getElementById('closeTranscriptBtn');
+    const closeTranscriptBtn2 = document.getElementById('closeTranscriptBtn2');
+    const contactInfo = document.getElementById('contactInfo');
+    
+    // API base URL
+    const API_BASE_URL = '/api';
+    
+    // Funzione per aggiungere un messaggio alla chat
+    function addMessage(text, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('chat-message');
+      messageDiv.classList.add(isUser ? 'user-message' : 'assistant-message');
+      
+      // Processa il markdown se è un messaggio dell'assistente
+      if (!isUser) {
+        messageDiv.innerHTML = marked.parse(text);
+      } else {
+        messageDiv.textContent = text;
+      }
+      
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    
+    // Funzione per mostrare il loader nel container della chat
+    function showChatLoader() {
+      const loaderDiv = document.createElement('div');
+      loaderDiv.id = 'chatLoader';
+      loaderDiv.classList.add('flex', 'justify-center', 'my-4');
+      loaderDiv.innerHTML = '<div class="loading-spinner"></div>';
+      chatContainer.appendChild(loaderDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    
+    // Funzione per rimuovere il loader
+    function removeChatLoader() {
+      const loader = document.getElementById('chatLoader');
+      if (loader) {
+        loader.remove();
+      }
+    }
+    
+    // Gestione dell'invio del messaggio
+    queryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const query = queryInput.value.trim();
+      if (!query || isLoading) return;
+      
+      // Aggiungi il messaggio dell'utente alla chat
+      addMessage(query, true);
+      
+      // Pulisci l'input
+      queryInput.value = '';
+      
+      // Imposta lo stato di caricamento
+      isLoading = true;
+      showChatLoader();
+      
+      try {
+        // Chiama l'API per ottenere la risposta
+        const response = await fetch(`${API_BASE_URL}/query`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: query,
+            session_id: sessionId
+          }),
+        });
+        
+        const data = await response.json();
+        
+        // Rimuovi il loader
+        removeChatLoader();
+        
+        if (response.ok) {
+          // Aggiungi la risposta dell'assistente alla chat
+          addMessage(data.answer);
+        } else {
+          // Gestione degli errori
+          addMessage("Mi dispiace, si è verificato un errore. Riprova più tardi o contatta il supporto.");
+          console.error("Errore nella richiesta:", data);
+        }
+      } catch (error) {
+        // Gestione degli errori di rete
+        removeChatLoader();
+        addMessage("Mi dispiace, si è verificato un errore di connessione. Verifica la tua connessione e riprova.");
+        console.error("Errore di rete:", error);
+      }
+      
+      isLoading = false;
+    });
+    
+    // Gestione del reset della conversazione
+    resetBtn.addEventListener('click', async () => {
+      if (isLoading) return;
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/reset`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            session_id: sessionId
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Pulisci la chat
+          chatContainer.innerHTML = '';
+          
+          // Aggiungi il messaggio di benvenuto
+          addMessage("Ciao! Sono l'assistente virtuale della Croce Rossa Italiana. Come posso aiutarti oggi?");
+        } else {
+          console.error("Errore nel reset della conversazione:", data);
+        }
+      } catch (error) {
+        console.error("Errore di rete:", error);
+      }
+    });
+    
+    // Gestione della visualizzazione della trascrizione
+    transcriptBtn.addEventListener('click', async () => {
+      transcriptModal.classList.remove('hidden');
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/transcript`);
+        const data = await response.json();
+        
+        if (response.ok && data.transcript) {
+          transcriptContent.innerHTML = '';
+          
+          if (data.transcript.length === 0) {
+            transcriptContent.innerHTML = '<p class="text-gray-500 text-center">Nessuna conversazione presente.</p>';
+          } else {
+            data.transcript.forEach(item => {
+              const userDiv = document.createElement('div');
+              userDiv.classList.add('mb-3');
+              userDiv.innerHTML = `
+                <p class="font-semibold text-sm text-gray-600">Tu:</p>
+                <p class="p-2 bg-gray-100 rounded-lg">${item.user}</p>
+              `;
+              
+              const assistantDiv = document.createElement('div');
+              assistantDiv.classList.add('mb-5');
+              assistantDiv.innerHTML = `
+                <p class="font-semibold text-sm text-gray-600">Assistente:</p>
+                <div class="p-2 bg-white border border-gray-200 rounded-lg">${marked.parse(item.assistant)}</div>
+              `;
+              
+              transcriptContent.appendChild(userDiv);
+              transcriptContent.appendChild(assistantDiv);
+            });
+          }
+        } else {
+          transcriptContent.innerHTML = '<p class="text-red-500 text-center">Errore nel caricamento della trascrizione.</p>';
+          console.error("Errore nel caricamento della trascrizione:", data);
+        }
+      } catch (error) {
+        transcriptContent.innerHTML = '<p class="text-red-500 text-center">Errore di connessione.</p>';
+        console.error("Errore di rete:", error);
+      }
+    });
+    
+    // Chiusura del modal della trascrizione
+    closeTranscriptBtn.addEventListener('click', () => {
+      transcriptModal.classList.add('hidden');
+    });
+    
+    closeTranscriptBtn2.addEventListener('click', () => {
+      transcriptModal.classList.add('hidden');
+    });
+    
+    // Caricamento delle informazioni di contatto all'avvio
+    async function loadContactInfo() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/contact`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          contactInfo.innerHTML = `
+            <h4 class="font-semibold mb-2">${data.name}</h4>
+            <p class="text-sm text-gray-600 mb-3">${data.description}</p>
+            <div class="space-y-2">
+              <p class="flex items-center text-sm">
+                <i class="fas fa-globe w-5 text-cri-red"></i>
+                <a href="${data.website}" target="_blank" class="ml-2 text-cri-red hover:underline">${data.website}</a>
+              </p>
+              <p class="flex items-center text-sm">
+                <i class="fas fa-envelope w-5 text-cri-red"></i>
+                <a href="mailto:${data.email}" class="ml-2 text-gray-600">${data.email}</a>
+              </p>
+              <p class="flex items-center text-sm">
+                <i class="fas fa-phone w-5 text-cri-red"></i>
+                <span class="ml-2 text-gray-600">${data.phone}</span>
+              </p>
+              <p class="flex items-start text-sm">
+                <i class="fas fa-map-marker-alt w-5 mt-1 text-cri-red"></i>
+                <span class="ml-2 text-gray-600">${data.headquarters}</span>
+              </p>
+            </div>
+          `;
+        } else {
+          contactInfo.innerHTML = '<p class="text-red-500 text-center">Errore nel caricamento delle informazioni di contatto.</p>';
+          console.error("Errore nel caricamento delle informazioni di contatto:", data);
+        }
+      } catch (error) {
+        contactInfo.innerHTML = '<p class="text-red-500 text-center">Errore di connessione.</p>';
+        console.error("Errore di rete:", error);
+      }
+    }
+    
+    // Carica le informazioni di contatto all'avvio
+    loadContactInfo();
+    
+    // Adatta l'altezza della textarea mentre si scrive
+    queryInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+    
+    // Funzioni di utilità per il click-to-copy
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.classList.contains('copy-code-btn')) {
+        const codeBlock = e.target.parentElement.querySelector('code');
+        const text = codeBlock.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+          e.target.textContent = 'Copiato!';
+          setTimeout(() => {
+            e.target.textContent = 'Copia';
+          }, 2000);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
