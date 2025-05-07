@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Assistente Croce Rossa Italiana</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Font -->
+  <!-- Google Font - Nuovi font più eleganti -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Marked.js per il parsing del Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -28,7 +30,8 @@
             },
           },
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
+            sans: ['Rubik', 'sans-serif'],
+            display: ['Playfair Display', 'serif'],
           },
           animation: {
             'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -81,6 +84,11 @@
       background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e3000f' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
     
+    .dark .cross-pattern {
+      background-color: rgba(0, 0, 0, 0.9);
+      background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e3000f' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
     /* Effetto background 3D con gradiente */
     .bg-gradient-3d {
       position: relative;
@@ -100,6 +108,11 @@
       z-index: -1;
       opacity: 0.6;
       pointer-events: none;
+    }
+    
+    .dark .bg-gradient-3d::before {
+      background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 60%);
+      opacity: 0.3;
     }
     
     /* Effetto floating per elementi di UI */
@@ -144,162 +157,114 @@
     }
   </style>
 </head>
-<body class="bg-gray-50 cross-pattern h-screen overflow-hidden">
+<body class="bg-gray-50 cross-pattern h-screen overflow-hidden font-sans dark:text-gray-200">
   <!-- Overlay per effetto glass quando si apre il menu mobile -->
   <div id="mobileMenuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm hidden md:hidden"></div>
   
   <div class="flex h-screen">
     <!-- Sidebar (desktop) -->
-    <aside class="hidden md:flex w-64 bg-white shadow-lg z-10 flex-col border-r border-gray-100 transition-all duration-300">
-      <div class="p-4 flex items-center border-b border-gray-100">
+    <aside class="hidden md:flex w-72 bg-white dark:bg-gray-900 shadow-lg z-10 flex-col border-r border-gray-100 dark:border-gray-800 transition-all duration-300">
+      <div class="p-4 flex items-center border-b border-gray-100 dark:border-gray-800">
         <div class="w-9 h-9 flex items-center justify-center bg-cri-red rounded-xl mr-3 shadow-md">
           <i class="fas fa-plus text-white text-sm"></i>
         </div>
         <div>
-          <span class="font-bold text-gray-800 block text-sm">CRI Assistente</span>
-          <span class="text-xs text-gray-500">Croce Rossa Italiana</span>
+          <span class="font-bold text-gray-800 dark:text-white block text-sm">CRI Assistente</span>
+          <span class="text-xs text-gray-500 dark:text-gray-400">Croce Rossa Italiana</span>
         </div>
       </div>
       
-      <nav class="flex-grow py-6 px-3">
-        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">Menu principale</div>
-        
-        <div class="space-y-1">
-          <div class="flex items-center px-3 py-2.5 text-cri-red bg-red-50 rounded-xl font-medium cursor-pointer transition-all hover:bg-red-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-comment-dots text-cri-red"></i>
-            </div>
-            <span>Chat</span>
-          </div>
-          
-          <div id="newChatBtn" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-plus text-gray-500"></i>
-            </div>
-            <span>Nuova chat</span>
-          </div>
-          
-          <div id="historyBtn" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-history text-gray-500"></i>
-            </div>
-            <span>Cronologia</span>
-          </div>
-        </div>
-        
-        <div class="border-t border-gray-100 my-6"></div>
-        
-        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">Aiuto</div>
-        
-        <div class="space-y-1">
-          <div class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-question-circle text-gray-500"></i>
-            </div>
-            <span>Guida</span>
-          </div>
-          
-          <a href="https://cri.it/" target="_blank" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-external-link-alt text-gray-500"></i>
-            </div>
-            <span>Sito CRI</span>
-          </a>
-        </div>
-      </nav>
-      
-      <div class="p-4 border-t border-gray-100">
-        <div class="flex items-center p-3 bg-gray-50 rounded-xl">
-          <div class="w-8 h-8 bg-gray-200 rounded-full mr-3 flex items-center justify-center text-sm text-gray-500 font-medium">U</div>
-          <div class="flex-grow">
-            <div class="text-sm font-medium text-gray-700">Utente</div>
-            <div class="text-xs text-gray-500">Sessione attiva</div>
-          </div>
-          <button class="text-gray-400 hover:text-gray-600">
-            <i class="fas fa-cog"></i>
+      <div class="flex-grow flex flex-col overflow-hidden">
+        <div class="px-4 py-4 flex items-center justify-between">
+          <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Le tue conversazioni</div>
+          <button id="newChatBtn" class="text-cri-red hover:text-cri-darkred p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+            <i class="fas fa-plus"></i>
           </button>
+        </div>
+        
+        <!-- Lista di chat -->
+        <div id="chatsList" class="flex-grow overflow-y-auto px-2 custom-scrollbar">
+          <!-- Le chat verranno aggiunte qui dinamicamente -->
+        </div>
+        
+        <div class="border-t border-gray-100 dark:border-gray-800 my-2"></div>
+        
+        <div class="px-4 py-2">
+          <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Aiuto</div>
+          
+          <div class="space-y-1">
+            <div id="guidaBtn" class="flex items-center px-3 py-2.5 text-gray-600 dark:text-gray-300 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 group">
+              <div class="w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-700 rounded-lg shadow-sm mr-3 group-hover:shadow">
+                <i class="fas fa-question-circle text-gray-500 dark:text-gray-400"></i>
+              </div>
+              <span>Guida</span>
+            </div>
+            
+            <a href="https://cri.it/" target="_blank" class="flex items-center px-3 py-2.5 text-gray-600 dark:text-gray-300 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 group">
+              <div class="w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-700 rounded-lg shadow-sm mr-3 group-hover:shadow">
+                <i class="fas fa-external-link-alt text-gray-500 dark:text-gray-400"></i>
+              </div>
+              <span>Sito CRI</span>
+            </a>
+          </div>
         </div>
       </div>
     </aside>
     
     <!-- Mobile menu button (visible only on mobile) -->
-    <button id="mobileMenuButton" class="md:hidden fixed top-4 left-4 z-50 bg-white w-10 h-10 rounded-xl shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50">
+    <button id="mobileMenuButton" class="md:hidden fixed top-4 left-4 z-50 bg-white dark:bg-gray-800 w-10 h-10 rounded-xl shadow-lg flex items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
       <i class="fas fa-bars"></i>
     </button>
     
     <!-- Mobile sidebar (hidden by default) -->
-    <aside id="mobileSidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 transform -translate-x-full transition-transform duration-300 md:hidden">
+    <aside id="mobileSidebar" class="fixed inset-y-0 left-0 w-72 bg-white dark:bg-gray-900 shadow-lg z-50 transform -translate-x-full transition-transform duration-300 md:hidden">
       <!-- Mobile sidebar content: same as desktop sidebar -->
-      <div class="p-4 flex items-center border-b border-gray-100">
+      <div class="p-4 flex items-center border-b border-gray-100 dark:border-gray-800">
         <div class="w-9 h-9 flex items-center justify-center bg-cri-red rounded-xl mr-3 shadow-md">
           <i class="fas fa-plus text-white text-sm"></i>
         </div>
         <div>
-          <span class="font-bold text-gray-800 block text-sm">CRI Assistente</span>
-          <span class="text-xs text-gray-500">Croce Rossa Italiana</span>
+          <span class="font-bold text-gray-800 dark:text-white block text-sm">CRI Assistente</span>
+          <span class="text-xs text-gray-500 dark:text-gray-400">Croce Rossa Italiana</span>
         </div>
-        <button id="closeMobileMenu" class="ml-auto text-gray-400 hover:text-gray-600">
+        <button id="closeMobileMenu" class="ml-auto text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
           <i class="fas fa-times"></i>
         </button>
       </div>
       
-      <nav class="flex-grow py-6 px-3">
-        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">Menu principale</div>
-        
-        <div class="space-y-1">
-          <div class="flex items-center px-3 py-2.5 text-cri-red bg-red-50 rounded-xl font-medium cursor-pointer transition-all hover:bg-red-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-comment-dots text-cri-red"></i>
-            </div>
-            <span>Chat</span>
-          </div>
-          
-          <div id="newChatBtnMobile" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-plus text-gray-500"></i>
-            </div>
-            <span>Nuova chat</span>
-          </div>
-          
-          <div id="historyBtnMobile" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-history text-gray-500"></i>
-            </div>
-            <span>Cronologia</span>
-          </div>
-        </div>
-        
-        <div class="border-t border-gray-100 my-6"></div>
-        
-        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">Aiuto</div>
-        
-        <div class="space-y-1">
-          <div class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-question-circle text-gray-500"></i>
-            </div>
-            <span>Guida</span>
-          </div>
-          
-          <a href="https://cri.it/" target="_blank" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
-            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
-              <i class="fas fa-external-link-alt text-gray-500"></i>
-            </div>
-            <span>Sito CRI</span>
-          </a>
-        </div>
-      </nav>
-      
-      <div class="p-4 border-t border-gray-100">
-        <div class="flex items-center p-3 bg-gray-50 rounded-xl">
-          <div class="w-8 h-8 bg-gray-200 rounded-full mr-3 flex items-center justify-center text-sm text-gray-500 font-medium">U</div>
-          <div class="flex-grow">
-            <div class="text-sm font-medium text-gray-700">Utente</div>
-            <div class="text-xs text-gray-500">Sessione attiva</div>
-          </div>
-          <button class="text-gray-400 hover:text-gray-600">
-            <i class="fas fa-cog"></i>
+      <div class="flex-grow flex flex-col overflow-hidden">
+        <div class="px-4 py-4 flex items-center justify-between">
+          <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Le tue conversazioni</div>
+          <button id="newChatBtnMobile" class="text-cri-red hover:text-cri-darkred p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+            <i class="fas fa-plus"></i>
           </button>
+        </div>
+        
+        <!-- Lista di chat mobile -->
+        <div id="chatsListMobile" class="flex-grow overflow-y-auto px-2 custom-scrollbar">
+          <!-- Le chat verranno aggiunte qui dinamicamente -->
+        </div>
+        
+        <div class="border-t border-gray-100 dark:border-gray-800 my-2"></div>
+        
+        <div class="px-4 py-2">
+          <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Aiuto</div>
+          
+          <div class="space-y-1">
+            <div id="guidaBtnMobile" class="flex items-center px-3 py-2.5 text-gray-600 dark:text-gray-300 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 group">
+              <div class="w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-700 rounded-lg shadow-sm mr-3 group-hover:shadow">
+                <i class="fas fa-question-circle text-gray-500 dark:text-gray-400"></i>
+              </div>
+              <span>Guida</span>
+            </div>
+            
+            <a href="https://cri.it/" target="_blank" class="flex items-center px-3 py-2.5 text-gray-600 dark:text-gray-300 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800 group">
+              <div class="w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-700 rounded-lg shadow-sm mr-3 group-hover:shadow">
+                <i class="fas fa-external-link-alt text-gray-500 dark:text-gray-400"></i>
+              </div>
+              <span>Sito CRI</span>
+            </a>
+          </div>
         </div>
       </div>
     </aside>
@@ -309,12 +274,12 @@
       <!-- Header con background 3D -->
       <div class="bg-gradient-to-r from-cri-red to-cri-darkred relative h-40 md:h-32 flex items-center justify-center bg-gradient-3d">
         <!-- Pattern background -->
-        <div class="absolute inset-0 bg-black bg-opacity-5"></div>
+        <div class="absolute inset-0 bg-black bg-opacity-5 dark:bg-opacity-20"></div>
         
         <!-- Header content -->
         <div class="relative z-10 px-6 md:px-12 w-full">
           <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between">
-            <h1 class="text-white text-2xl md:text-3xl font-bold">
+            <h1 class="text-white text-2xl md:text-3xl font-bold font-display tracking-wide">
               <span class="inline-block transform hover:scale-105 transition-transform cursor-default">
                 Assistente Croce Rossa
               </span>
@@ -322,7 +287,7 @@
             </h1>
             
             <!-- Theme switcher -->
-            <div class="hidden md:flex bg-white bg-opacity-20 rounded-full p-1 mt-2 md:mt-0">
+            <div class="mt-2 md:mt-0 flex bg-white bg-opacity-20 rounded-full p-1">
               <button id="lightModeBtn" class="text-white text-xs font-medium px-3 py-1 rounded-full bg-white bg-opacity-30">Chiaro</button>
               <button id="darkModeBtn" class="text-white text-xs font-medium px-3 py-1 rounded-full">Scuro</button>
             </div>
@@ -331,30 +296,30 @@
         
         <!-- Wave at bottom -->
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-6 md:h-8 text-gray-50 fill-current">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-6 md:h-8 text-gray-50 dark:text-gray-900 fill-current">
             <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"></path>
           </svg>
         </div>
       </div>
       
       <!-- Suggerimenti rapidi -->
-      <div class="px-4 py-3 bg-gray-50">
+      <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900">
         <div class="max-w-4xl mx-auto">
-          <div class="text-sm font-medium text-gray-500 mb-2">Domande frequenti:</div>
+          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Domande frequenti:</div>
           <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar">
-            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+            <button class="whitespace-nowrap px-4 py-2 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 rounded-full shadow-sm hover:shadow border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
               Come diventare volontario?
             </button>
-            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+            <button class="whitespace-nowrap px-4 py-2 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 rounded-full shadow-sm hover:shadow border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
               Corsi di primo soccorso
             </button>
-            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+            <button class="whitespace-nowrap px-4 py-2 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 rounded-full shadow-sm hover:shadow border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
               Donare sangue
             </button>
-            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+            <button class="whitespace-nowrap px-4 py-2 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 rounded-full shadow-sm hover:shadow border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
               Emergenze attive
             </button>
-            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+            <button class="whitespace-nowrap px-4 py-2 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 rounded-full shadow-sm hover:shadow border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
               Come donare
             </button>
           </div>
@@ -366,13 +331,13 @@
         <div id="chatContainer" class="absolute inset-0 overflow-y-auto p-4 md:p-6 custom-scrollbar">
           <div class="max-w-4xl mx-auto space-y-6 pb-20">
             <!-- Messaggio di benvenuto dell'assistente con illustrazione -->
-            <div class="flex flex-col md:flex-row gap-4 items-center p-6 bg-white rounded-2xl shadow-md border border-gray-100 slide-in-left">
-              <div class="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 bg-red-50 rounded-2xl flex items-center justify-center">
+            <div class="flex flex-col md:flex-row gap-4 items-center p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 slide-in-left">
+              <div class="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 bg-red-50 dark:bg-red-900/30 rounded-2xl flex items-center justify-center">
                 <i class="fas fa-robot text-cri-red text-3xl"></i>
               </div>
               <div class="flex-grow">
-                <h2 class="text-lg md:text-xl font-semibold text-gray-800 mb-2">Benvenuto all'Assistente CRI</h2>
-                <p class="text-gray-600">Sono qui per rispondere alle tue domande sulla Croce Rossa Italiana, fornire informazioni sui servizi e guidarti nelle attività di volontariato. Come posso aiutarti oggi?</p>
+                <h2 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-white mb-2 font-display">Benvenuto all'Assistente CRI</h2>
+                <p class="text-gray-600 dark:text-gray-300">Sono qui per rispondere alle tue domande sulla Croce Rossa Italiana, fornire informazioni sui servizi e guidarti nelle attività di volontariato. Come posso aiutarti oggi?</p>
               </div>
             </div>
             
@@ -384,54 +349,49 @@
       <!-- Input area con effetto floating -->
       <div class="relative z-10">
         <div class="absolute -top-7 left-0 right-0 overflow-hidden">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-7 text-white fill-current">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-7 text-white dark:text-gray-800 fill-current">
             <path d="M0,0V7.23C0,65.52,268.63,112.77,600,112.77S1200,65.52,1200,7.23V0Z" class="shape-fill"></path>
           </svg>
         </div>
         
-        <div class="bg-white border-t border-gray-200 p-4 md:p-6">
+        <div class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 md:p-6">
           <div class="max-w-4xl mx-auto">
             <!-- Contenitore per pulsanti di azione e input -->
             <form id="queryForm" class="relative">
-              <div class="flex items-center gap-2 mb-2">
-                <button type="button" id="resetBtn" class="flex items-center justify-center w-9 h-9 text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
-                  <i class="fas fa-sync-alt"></i>
-                </button>
-                <div class="relative flex-grow">
-                  <div class="relative flex items-end">
-                    <div class="relative flex-grow border-2 border-gray-200 rounded-2xl bg-white shadow-sm transition-all focus-within:border-cri-red focus-within:shadow-lg">
-                      <textarea 
-                        id="queryInput" 
-                        class="w-full bg-transparent border-none rounded-2xl py-3 px-4 pr-12 resize-none focus:ring-0 focus:outline-none custom-scrollbar max-h-32"
-                        placeholder="Scrivi qui la tua domanda..."
-                        rows="1"
-                      ></textarea>
-                      <button 
-                        type="button" 
-                        id="sendBtn" 
-                        class="absolute right-2 bottom-2 text-cri-red disabled:text-gray-300 rounded-full p-2 hover:bg-red-50 transition-colors disabled:hover:bg-transparent"
-                        disabled
-                      >
-                        <i class="fas fa-paper-plane"></i>
-                      </button>
-                    </div>
+              <div class="relative flex-grow">
+                <div class="relative flex items-end">
+                  <div class="relative flex-grow border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-700 shadow-sm transition-all focus-within:border-cri-red focus-within:shadow-lg">
+                    <textarea 
+                      id="queryInput" 
+                      class="w-full bg-transparent border-none rounded-2xl py-3 px-4 pr-12 resize-none focus:ring-0 focus:outline-none custom-scrollbar max-h-32 text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      placeholder="Scrivi qui la tua domanda..."
+                      rows="1"
+                    ></textarea>
+                    <button 
+                      type="button" 
+                      id="sendBtn" 
+                      class="absolute right-2 bottom-2 text-cri-red disabled:text-gray-300 dark:disabled:text-gray-600 rounded-full p-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:hover:bg-transparent"
+                      disabled
+                    >
+                      <i class="fas fa-paper-plane"></i>
+                    </button>
                   </div>
-                  
-                  <div class="flex justify-between items-center text-xs text-gray-500 mt-1.5 px-1">
-                    <div>
-                      <span class="inline-flex items-center gap-1">
-                        <span class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs">Enter</span> 
-                        <span>per inviare</span>
-                      </span>
-                      <span class="mx-2">·</span>
-                      <span class="inline-flex items-center gap-1">
-                        <span class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs">Shift</span>+<span class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs">Enter</span> 
-                        <span>per andare a capo</span>
-                      </span>
-                    </div>
-                    <div class="text-xs text-gray-400 hidden md:block">
-                      Powered by <span class="font-medium">CRI</span>
-                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mt-1.5 px-1">
+                  <div>
+                    <span class="inline-flex items-center gap-1">
+                      <span class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 text-xs">Enter</span> 
+                      <span>per inviare</span>
+                    </span>
+                    <span class="mx-2">·</span>
+                    <span class="inline-flex items-center gap-1">
+                      <span class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 text-xs">Shift</span>+<span class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 text-xs">Enter</span> 
+                      <span>per andare a capo</span>
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-400 dark:text-gray-500 hidden md:block">
+                    Powered by <span class="font-medium">CRI</span>
                   </div>
                 </div>
               </div>
@@ -442,29 +402,100 @@
     </main>
   </div>
   
-  <!-- Modal per la cronologia della conversazione -->
-  <div id="transcriptModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="transcriptModalContent">
-      <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-          <i class="fas fa-history mr-2 text-cri-red"></i>
-          Cronologia della conversazione
+  <!-- Modal per confermare l'eliminazione della chat -->
+  <div id="deleteChatModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="deleteChatModalContent">
+      <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+          <i class="fas fa-trash-alt mr-2 text-cri-red"></i>
+          Elimina chat
         </h3>
-        <button id="closeTranscriptBtn" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+        <button id="closeDeleteChatBtn" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div id="transcriptContent" class="px-6 py-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
-        <div class="flex justify-center items-center h-20">
-          <div class="w-8 h-8 border-3 border-t-transparent border-cri-red rounded-full animate-spin"></div>
+      <div class="px-6 py-6">
+        <p class="text-gray-600 dark:text-gray-300">Sei sicuro di voler eliminare questa chat? Questa azione non può essere annullata.</p>
+      </div>
+      <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end items-center space-x-3">
+        <button id="cancelDeleteChatBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          Annulla
+        </button>
+        <button id="confirmDeleteChatBtn" class="px-4 py-2 bg-cri-red text-white rounded-lg text-sm hover:bg-cri-darkred transition-colors">
+          Elimina
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal per la guida -->
+  <div id="guidaModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="guidaModalContent">
+      <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+          <i class="fas fa-question-circle mr-2 text-cri-red"></i>
+          Guida all'utilizzo
+        </h3>
+        <button id="closeGuidaBtn" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="px-6 py-6 overflow-y-auto max-h-[70vh] custom-scrollbar">
+        <div class="space-y-6">
+          <div>
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2 font-display">Benvenuto all'Assistente Virtuale CRI</h4>
+            <p class="text-gray-600 dark:text-gray-300 mb-2">Questo assistente è progettato per fornirti informazioni accurate e utili sulla Croce Rossa Italiana. Ecco come utilizzarlo al meglio:</p>
+          </div>
+          
+          <div>
+            <h5 class="font-medium text-gray-800 dark:text-white mb-1 flex items-center">
+              <i class="fas fa-comments text-cri-red mr-2"></i>
+              Come fare domande
+            </h5>
+            <p class="text-gray-600 dark:text-gray-300 mb-2">Scrivi la tua domanda nella casella di testo in basso e premi Enter o clicca l'icona di invio. Puoi chiedere informazioni su servizi, attività, eventi, come diventare volontario e molto altro.</p>
+          </div>
+          
+          <div>
+            <h5 class="font-medium text-gray-800 dark:text-white mb-1 flex items-center">
+              <i class="fas fa-plus-circle text-cri-red mr-2"></i>
+              Gestione delle conversazioni
+            </h5>
+            <p class="text-gray-600 dark:text-gray-300 mb-2">Puoi avere più conversazioni attive contemporaneamente. Usa il pulsante "+" nella sidebar per creare una nuova chat. Puoi passare da una chat all'altra cliccando su di esse nella sidebar.</p>
+          </div>
+          
+          <div>
+            <h5 class="font-medium text-gray-800 dark:text-white mb-1 flex items-center">
+              <i class="fas fa-trash-alt text-cri-red mr-2"></i>
+              Eliminare una chat
+            </h5>
+            <p class="text-gray-600 dark:text-gray-300 mb-2">Se desideri eliminare una conversazione, clicca sull'icona del cestino accanto alla chat nella sidebar. Ti verrà chiesta conferma prima di procedere con l'eliminazione.</p>
+          </div>
+          
+          <div>
+            <h5 class="font-medium text-gray-800 dark:text-white mb-1 flex items-center">
+              <i class="fas fa-moon text-cri-red mr-2"></i>
+              Modalità chiaro/scuro
+            </h5>
+            <p class="text-gray-600 dark:text-gray-300 mb-2">Puoi passare dalla modalità chiara a quella scura usando i pulsanti nell'angolo in alto a destra dell'applicazione.</p>
+          </div>
+          
+          <div>
+            <h5 class="font-medium text-gray-800 dark:text-white mb-1 flex items-center">
+              <i class="fas fa-info-circle text-cri-red mr-2"></i>
+              Suggerimenti rapidi
+            </h5>
+            <p class="text-gray-600 dark:text-gray-300 mb-2">Per aiutarti a iniziare, abbiamo creato alcuni suggerimenti rapidi che puoi trovare nella parte superiore dell'applicazione. Clicca su uno di essi per fare una domanda predefinita.</p>
+          </div>
+          
+          <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <h5 class="font-medium text-gray-800 dark:text-white mb-1">Informazioni sull'assistente</h5>
+            <p class="text-gray-600 dark:text-gray-300 mb-2">Questo assistente virtuale è progettato per fornire informazioni sulla Croce Rossa Italiana. Le risposte sono basate su documenti ufficiali della CRI. Per maggiori informazioni, visita il <a href="https://cri.it" target="_blank" class="text-cri-red hover:underline">sito ufficiale della Croce Rossa Italiana</a>.</p>
+          </div>
         </div>
       </div>
-      <div class="border-t border-gray-200 px-6 py-4 flex justify-between items-center">
-        <button id="clearHistoryBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">
-          <i class="fas fa-trash-alt mr-1"></i> Cancella cronologia
-        </button>
-        <button id="closeTranscriptBtn2" class="px-4 py-2 bg-cri-red text-white rounded-lg text-sm hover:bg-cri-darkred transition-colors">
-          Chiudi
+      <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end items-center">
+        <button id="closeGuidaBtn2" class="px-4 py-2 bg-cri-red text-white rounded-lg text-sm hover:bg-cri-darkred transition-colors">
+          Ho capito
         </button>
       </div>
     </div>
@@ -476,35 +507,283 @@
     const queryInput = document.getElementById('queryInput');
     const chatContainer = document.getElementById('chatContainer');
     const sendBtn = document.getElementById('sendBtn');
-    const resetBtn = document.getElementById('resetBtn');
     const newChatBtn = document.getElementById('newChatBtn');
     const newChatBtnMobile = document.getElementById('newChatBtnMobile');
-    const historyBtn = document.getElementById('historyBtn');
-    const historyBtnMobile = document.getElementById('historyBtnMobile');
-    const transcriptModal = document.getElementById('transcriptModal');
-    const transcriptModalContent = document.getElementById('transcriptModalContent');
-    const transcriptContent = document.getElementById('transcriptContent');
-    const closeTranscriptBtn = document.getElementById('closeTranscriptBtn');
-    const closeTranscriptBtn2 = document.getElementById('closeTranscriptBtn2');
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const chatsList = document.getElementById('chatsList');
+    const chatsListMobile = document.getElementById('chatsListMobile');
     const mobileMenuButton = document.getElementById('mobileMenuButton');
     const closeMobileMenu = document.getElementById('closeMobileMenu');
     const mobileSidebar = document.getElementById('mobileSidebar');
     const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
     const lightModeBtn = document.getElementById('lightModeBtn');
     const darkModeBtn = document.getElementById('darkModeBtn');
+    const htmlElement = document.documentElement;
     
-    // Variabili per la gestione della sessione
-    let sessionId = localStorage.getItem('cri_session_id');
-    if (!sessionId) {
-      sessionId = 'user_' + Math.random().toString(36).substring(2, 8);
-      localStorage.setItem('cri_session_id', sessionId);
-    }
+    // Elementi modali
+    const deleteChatModal = document.getElementById('deleteChatModal');
+    const deleteChatModalContent = document.getElementById('deleteChatModalContent');
+    const closeDeleteChatBtn = document.getElementById('closeDeleteChatBtn');
+    const cancelDeleteChatBtn = document.getElementById('cancelDeleteChatBtn');
+    const confirmDeleteChatBtn = document.getElementById('confirmDeleteChatBtn');
+    
+    const guidaModal = document.getElementById('guidaModal');
+    const guidaModalContent = document.getElementById('guidaModalContent');
+    const closeGuidaBtn = document.getElementById('closeGuidaBtn');
+    const closeGuidaBtn2 = document.getElementById('closeGuidaBtn2');
+    const guidaBtn = document.getElementById('guidaBtn');
+    const guidaBtnMobile = document.getElementById('guidaBtnMobile');
+    
+    // Variabili per la gestione delle chat multiple
+    let activeSessionId = null;
+    let currentChatId = null;
+    let chatToDelete = null;
     let isLoading = false;
-    let conversationHistory = [];
+    let chats = [];
     
-    // API base URL (modificare in base alla configurazione del server)
+    // API base URL
     const API_BASE_URL = '/api';
+    
+    // Inizializzazione
+    function initApp() {
+      // Carica le chat salvate
+      loadSavedChats();
+      
+      // Se non ci sono chat, crea la prima
+      if (chats.length === 0) {
+        createNewChat();
+      } else {
+        // Altrimenti carica l'ultima chat attiva
+        const lastActiveChat = chats.find(chat => chat.isActive) || chats[0];
+        activateChat(lastActiveChat.id);
+      }
+      
+      // Carica il tema salvato
+      loadTheme();
+      
+      // Imposta il focus sull'input
+      queryInput.focus();
+    }
+    
+    // Funzione per caricare il tema salvato
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('cri_theme') || 'light';
+      setTheme(savedTheme);
+      
+      // Evidenzia il pulsante corretto
+      if (savedTheme === 'dark') {
+        lightModeBtn.classList.remove('bg-white', 'bg-opacity-30');
+        darkModeBtn.classList.add('bg-white', 'bg-opacity-30');
+      } else {
+        lightModeBtn.classList.add('bg-white', 'bg-opacity-30');
+        darkModeBtn.classList.remove('bg-white', 'bg-opacity-30');
+      }
+    }
+    
+    // Funzione per impostare il tema
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        htmlElement.classList.add('dark');
+      } else {
+        htmlElement.classList.remove('dark');
+      }
+      localStorage.setItem('cri_theme', theme);
+    }
+    
+    // Funzione per caricare le chat salvate
+    function loadSavedChats() {
+      const savedChats = localStorage.getItem('cri_chats');
+      if (savedChats) {
+        chats = JSON.parse(savedChats);
+      }
+      renderChatsList();
+    }
+    
+    // Funzione per salvare le chat
+    function saveChats() {
+      localStorage.setItem('cri_chats', JSON.stringify(chats));
+    }
+    
+    // Funzione per creare una nuova chat
+    function createNewChat() {
+      const chatId = 'chat_' + Date.now();
+      const sessionId = 'session_' + Math.random().toString(36).substring(2, 8);
+      
+      // Disattiva tutte le chat esistenti
+      chats.forEach(chat => chat.isActive = false);
+      
+      // Crea la nuova chat
+      const newChat = {
+        id: chatId,
+        sessionId: sessionId,
+        title: 'Nuova conversazione',
+        lastUpdated: new Date().toISOString(),
+        isActive: true,
+        messages: []
+      };
+      
+      // Aggiungi la chat all'array e salva
+      chats.unshift(newChat);
+      saveChats();
+      
+      // Aggiorna l'interfaccia e attiva la chat
+      renderChatsList();
+      activateChat(chatId);
+      
+      // Resetta l'interfaccia della chat
+      resetChatInterface();
+      
+      return chatId;
+    }
+    
+    // Funzione per attivare una chat esistente
+    function activateChat(chatId) {
+      // Trova la chat nell'array
+      const chatIndex = chats.findIndex(chat => chat.id === chatId);
+      if (chatIndex === -1) return;
+      
+      // Disattiva tutte le chat
+      chats.forEach(chat => chat.isActive = false);
+      
+      // Attiva la chat selezionata
+      chats[chatIndex].isActive = true;
+      currentChatId = chatId;
+      activeSessionId = chats[chatIndex].sessionId;
+      
+      // Aggiorna l'interfaccia
+      renderChatsList();
+      
+      // Carica i messaggi della chat
+      loadChatMessages(chatId);
+      
+      // Chiudi il menu mobile se aperto
+      closeMobileSidebar();
+      
+      // Salva le modifiche
+      saveChats();
+    }
+    
+    // Funzione per eliminare una chat
+    function deleteChat(chatId) {
+      // Trova l'indice della chat
+      const chatIndex = chats.findIndex(chat => chat.id === chatId);
+      if (chatIndex === -1) return;
+      
+      // Rimuovi la chat dall'array
+      chats.splice(chatIndex, 1);
+      
+      // Se era la chat attiva, attiva un'altra chat
+      if (currentChatId === chatId) {
+        if (chats.length > 0) {
+          activateChat(chats[0].id);
+        } else {
+          // Se non ci sono più chat, crea una nuova
+          createNewChat();
+        }
+      }
+      
+      // Aggiorna l'interfaccia e salva
+      renderChatsList();
+      saveChats();
+    }
+    
+    // Funzione per renderizzare la lista delle chat
+    function renderChatsList() {
+      // Svuota le liste
+      chatsList.innerHTML = '';
+      chatsListMobile.innerHTML = '';
+      
+      // Aggiungi ogni chat alle liste
+      chats.forEach(chat => {
+        const chatItem = createChatListItem(chat);
+        const chatItemMobile = createChatListItem(chat);
+        
+        chatsList.appendChild(chatItem);
+        chatsListMobile.appendChild(chatItemMobile);
+      });
+    }
+    
+    // Funzione per creare un elemento della lista chat
+    function createChatListItem(chat) {
+      const chatItem = document.createElement('div');
+      chatItem.className = `group flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all mb-1 ${chat.isActive ? 'bg-red-50 dark:bg-red-900/20 text-cri-red font-medium' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'}`;
+      chatItem.dataset.chatId = chat.id;
+      
+      chatItem.innerHTML = `
+        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+          <i class="fas fa-comment-dots ${chat.isActive ? 'text-cri-red' : 'text-gray-500 dark:text-gray-400'}"></i>
+        </div>
+        <div class="flex-grow truncate">
+          ${chat.title}
+        </div>
+        <button class="delete-chat-btn text-gray-400 hover:text-cri-red p-1 transition-all">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      `;
+      
+      // Evento per attivare la chat
+      chatItem.addEventListener('click', (e) => {
+        if (!e.target.closest('.delete-chat-btn')) {
+          activateChat(chat.id);
+        }
+      });
+      
+      // Evento per eliminare la chat
+      const deleteBtn = chatItem.querySelector('.delete-chat-btn');
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showDeleteChatModal(chat.id);
+      });
+      
+      return chatItem;
+    }
+    
+    // Funzione per caricare i messaggi di una chat
+    function loadChatMessages(chatId) {
+      // Trova la chat
+      const chat = chats.find(c => c.id === chatId);
+      if (!chat) return;
+      
+      // Pulisci il container
+      chatContainer.innerHTML = '';
+      
+      // Aggiungi il messaggio di benvenuto
+      const welcomeMessage = document.createElement('div');
+      welcomeMessage.className = 'flex flex-col md:flex-row gap-4 items-center p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 slide-in-left';
+      welcomeMessage.innerHTML = `
+        <div class="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 bg-red-50 dark:bg-red-900/30 rounded-2xl flex items-center justify-center">
+          <i class="fas fa-robot text-cri-red text-3xl"></i>
+        </div>
+        <div class="flex-grow">
+          <h2 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-white mb-2 font-display">Benvenuto all'Assistente CRI</h2>
+          <p class="text-gray-600 dark:text-gray-300">Sono qui per rispondere alle tue domande sulla Croce Rossa Italiana, fornire informazioni sui servizi e guidarti nelle attività di volontariato. Come posso aiutarti oggi?</p>
+        </div>
+      `;
+      chatContainer.appendChild(welcomeMessage);
+      
+      // Aggiungi i messaggi salvati
+      if (chat.messages && chat.messages.length > 0) {
+        chat.messages.forEach(msg => {
+          addMessage(msg.text, msg.isUser, msg.sources);
+        });
+      }
+    }
+    
+    // Funzione per resettare l'interfaccia della chat
+    function resetChatInterface() {
+      chatContainer.innerHTML = '';
+      const welcomeMessage = document.createElement('div');
+      welcomeMessage.className = 'flex flex-col md:flex-row gap-4 items-center p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 slide-in-left';
+      welcomeMessage.innerHTML = `
+        <div class="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 bg-red-50 dark:bg-red-900/30 rounded-2xl flex items-center justify-center">
+          <i class="fas fa-robot text-cri-red text-3xl"></i>
+        </div>
+        <div class="flex-grow">
+          <h2 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-white mb-2 font-display">Benvenuto all'Assistente CRI</h2>
+          <p class="text-gray-600 dark:text-gray-300">Sono qui per rispondere alle tue domande sulla Croce Rossa Italiana, fornire informazioni sui servizi e guidarti nelle attività di volontariato. Come posso aiutarti oggi?</p>
+        </div>
+      `;
+      chatContainer.appendChild(welcomeMessage);
+    }
     
     // Funzione per adattare l'altezza della textarea
     function adjustTextareaHeight() {
@@ -519,8 +798,8 @@
       if (isUser) {
         messageDiv.className = 'flex justify-end slide-in-right';
         messageDiv.innerHTML = `
-          <div class="bg-cri-red bg-opacity-5 border border-cri-red border-opacity-10 p-4 rounded-2xl rounded-tr-none max-w-md md:max-w-2xl shadow-sm">
-            <div class="text-gray-800">${text}</div>
+          <div class="bg-cri-red bg-opacity-5 dark:bg-red-900/10 border border-cri-red border-opacity-10 dark:border-opacity-20 p-4 rounded-2xl rounded-tr-none max-w-md md:max-w-2xl shadow-sm">
+            <div class="text-gray-800 dark:text-gray-200">${text}</div>
           </div>
         `;
       } else {
@@ -540,14 +819,14 @@
           });
           
           sourcesHTML = `
-            <div class="mt-3 pt-3 border-t border-gray-200">
+            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
               <div class="flex justify-between items-center cursor-pointer sources-toggle">
-                <p class="text-xs font-semibold text-gray-500">Fonti: ${uniqueSources.size}</p>
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Fonti: ${uniqueSources.size}</p>
                 <button class="text-xs text-cri-red hover:text-cri-darkred p-1">
                   <i class="fas fa-chevron-down toggle-icon"></i>
                 </button>
               </div>
-              <div class="sources-content hidden mt-2 text-xs text-gray-500">
+              <div class="sources-content hidden mt-2 text-xs text-gray-500 dark:text-gray-400">
                 <ul class="space-y-1">
                   ${Array.from(uniqueSources).map(source => `
                     <li class="flex items-start">
@@ -562,8 +841,8 @@
         }
         
         messageDiv.innerHTML = `
-          <div class="bg-white p-4 rounded-2xl rounded-tl-none max-w-md md:max-w-2xl shadow-md border border-gray-100">
-            <div class="prose prose-sm max-w-none">${htmlContent}</div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl rounded-tl-none max-w-md md:max-w-2xl shadow-md border border-gray-100 dark:border-gray-700">
+            <div class="prose prose-sm dark:prose-invert max-w-none dark:text-gray-300">${htmlContent}</div>
             ${sourcesHTML}
           </div>
         `;
@@ -591,6 +870,37 @@
       
       // Scroll to bottom
       chatContainer.scrollTop = chatContainer.scrollHeight;
+      
+      // Salva il messaggio nella chat corrente
+      if (currentChatId) {
+        const chatIndex = chats.findIndex(chat => chat.id === currentChatId);
+        if (chatIndex !== -1) {
+          if (!chats[chatIndex].messages) {
+            chats[chatIndex].messages = [];
+          }
+          
+          // Aggiungi il messaggio
+          chats[chatIndex].messages.push({
+            text: text,
+            isUser: isUser,
+            sources: sources,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Aggiorna il titolo della chat con il primo messaggio dell'utente
+          if (isUser && chats[chatIndex].title === 'Nuova conversazione' && chats[chatIndex].messages.filter(m => m.isUser).length === 1) {
+            // Limita il titolo a 30 caratteri
+            chats[chatIndex].title = text.length > 30 ? text.substring(0, 27) + '...' : text;
+            renderChatsList();
+          }
+          
+          // Aggiorna il timestamp
+          chats[chatIndex].lastUpdated = new Date().toISOString();
+          
+          // Salva le modifiche
+          saveChats();
+        }
+      }
     }
     
     // Funzione per mostrare il loader di "sta scrivendo..."
@@ -599,13 +909,13 @@
       typingDiv.id = 'typingIndicator';
       typingDiv.className = 'flex justify-start slide-in-left';
       typingDiv.innerHTML = `
-        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-md border border-gray-100 flex items-center">
+        <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-tl-none shadow-md border border-gray-100 dark:border-gray-700 flex items-center">
           <div class="flex space-x-1 px-2">
             <div class="w-2 h-2 bg-cri-red rounded-full animate-typing typing-dot"></div>
             <div class="w-2 h-2 bg-cri-red rounded-full animate-typing typing-dot"></div>
             <div class="w-2 h-2 bg-cri-red rounded-full animate-typing typing-dot"></div>
           </div>
-          <span class="text-xs text-gray-500 ml-2">Assistente sta scrivendo...</span>
+          <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">Assistente sta scrivendo...</span>
         </div>
       `;
       chatContainer.appendChild(typingDiv);
@@ -624,7 +934,7 @@
     async function sendQuestion(question) {
       try {
         // Verifica che ci sia una sessione
-        if (!sessionId) {
+        if (!activeSessionId) {
           console.error("sessionId non definito in sendQuestion");
           return;
         }
@@ -663,7 +973,7 @@
           },
           body: JSON.stringify({
             query: question,
-            session_id: sessionId,
+            session_id: activeSessionId,
             conversation_history: conversationHistory
           })
         });
@@ -753,123 +1063,11 @@
       }
     });
     
-    // Gestione della nuova chat (reset)
-    function resetChat() {
-      if (isLoading) return;
-      
-      fetch(`${API_BASE_URL}/reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          session_id: sessionId
-        }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (response.ok) {
-          // Pulisci la chat mantenendo solo il messaggio di benvenuto
-          const welcomeMessage = chatContainer.firstElementChild;
-          chatContainer.innerHTML = '';
-          chatContainer.appendChild(welcomeMessage);
-          conversationHistory = [];
-        } else {
-          console.error("Errore nel reset della conversazione:", data);
-        }
-      })
-      .catch(error => {
-        console.error("Errore di rete:", error);
-      });
-    }
-    
-    resetBtn.addEventListener('click', resetChat);
-    newChatBtn.addEventListener('click', resetChat);
+    // Gestione della nuova chat
+    newChatBtn.addEventListener('click', createNewChat);
     newChatBtnMobile.addEventListener('click', () => {
-      resetChat();
-      closeMobileMenu.click();
-    });
-    
-    // Gestione dell'apertura del modal per la cronologia
-    function openHistoryModal() {
-      transcriptModal.classList.remove('hidden');
-      setTimeout(() => {
-        transcriptModalContent.classList.remove('scale-95', 'opacity-0');
-      }, 10);
-      
-      fetch(`${API_BASE_URL}/transcript?session_id=${sessionId}`)
-        .then(response => response.json())
-        .then(data => {
-          if (response.ok && data.transcript) {
-            transcriptContent.innerHTML = '';
-            
-            if (data.transcript.length === 0) {
-              transcriptContent.innerHTML = '<p class="text-gray-500 text-center py-6">Nessuna conversazione presente.</p>';
-            } else {
-              const conversationsEl = document.createElement('div');
-              conversationsEl.className = 'space-y-8';
-              
-              data.transcript.forEach((item, index) => {
-                const conversationEl = document.createElement('div');
-                conversationEl.className = 'border border-gray-200 rounded-xl overflow-hidden';
-                
-                conversationEl.innerHTML = `
-                  <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                    <div class="font-medium text-sm text-gray-700">Conversazione ${index + 1}</div>
-                    <button class="text-xs text-gray-500 hover:text-gray-700 p-1">
-                      <i class="fas fa-copy"></i>
-                    </button>
-                  </div>
-                  <div class="p-4 space-y-4">
-                    <div>
-                      <p class="text-xs text-gray-500 mb-1">Tu:</p>
-                      <p class="p-2 bg-gray-50 rounded-lg text-sm">${item.user}</p>
-                    </div>
-                    <div>
-                      <p class="text-xs text-gray-500 mb-1">Assistente:</p>
-                      <div class="p-2 bg-white border border-gray-100 rounded-lg shadow-sm text-sm">${marked.parse(item.assistant)}</div>
-                    </div>
-                  </div>
-                `;
-                
-                conversationsEl.appendChild(conversationEl);
-              });
-              
-              transcriptContent.appendChild(conversationsEl);
-            }
-          } else {
-            transcriptContent.innerHTML = '<p class="text-red-500 text-center py-6">Errore nel caricamento della cronologia.</p>';
-            console.error("Errore nel caricamento della cronologia:", data);
-          }
-        })
-        .catch(error => {
-          transcriptContent.innerHTML = '<p class="text-red-500 text-center py-6">Errore di connessione.</p>';
-          console.error("Errore di rete:", error);
-        });
-    }
-    
-    historyBtn.addEventListener('click', openHistoryModal);
-    historyBtnMobile.addEventListener('click', () => {
-      openHistoryModal();
-      closeMobileMenu.click();
-    });
-    
-    // Chiusura del modal della cronologia
-    function closeHistoryModal() {
-      transcriptModalContent.classList.add('scale-95', 'opacity-0');
-      setTimeout(() => {
-        transcriptModal.classList.add('hidden');
-      }, 300);
-    }
-    
-    closeTranscriptBtn.addEventListener('click', closeHistoryModal);
-    closeTranscriptBtn2.addEventListener('click', closeHistoryModal);
-    
-    // Click all'esterno del modal per chiuderlo
-    transcriptModal.addEventListener('click', (e) => {
-      if (e.target === transcriptModal) {
-        closeHistoryModal();
-      }
+      createNewChat();
+      closeMobileSidebar();
     });
     
     // Gestione del menu mobile
@@ -886,13 +1084,15 @@
     closeMobileMenu.addEventListener('click', closeMobileSidebar);
     mobileMenuOverlay.addEventListener('click', closeMobileSidebar);
     
-    // Gestione del cambio tema (per ora solo UI, non funzionale)
+    // Gestione del cambio tema
     lightModeBtn.addEventListener('click', function() {
+      setTheme('light');
       lightModeBtn.classList.add('bg-white', 'bg-opacity-30');
       darkModeBtn.classList.remove('bg-white', 'bg-opacity-30');
     });
     
     darkModeBtn.addEventListener('click', function() {
+      setTheme('dark');
       darkModeBtn.classList.add('bg-white', 'bg-opacity-30');
       lightModeBtn.classList.remove('bg-white', 'bg-opacity-30');
     });
@@ -914,7 +1114,74 @@
       });
     });
     
+    // Funzione per mostrare il modal di conferma eliminazione chat
+    function showDeleteChatModal(chatId) {
+      chatToDelete = chatId;
+      deleteChatModal.classList.remove('hidden');
+      setTimeout(() => {
+        deleteChatModalContent.classList.remove('scale-95', 'opacity-0');
+      }, 10);
+    }
+    
+    // Funzione per chiudere il modal di eliminazione
+    function closeDeleteChatModal() {
+      deleteChatModalContent.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        deleteChatModal.classList.add('hidden');
+        chatToDelete = null;
+      }, 300);
+    }
+    
+    // Funzione per mostrare il modal della guida
+    function showGuidaModal() {
+      guidaModal.classList.remove('hidden');
+      setTimeout(() => {
+        guidaModalContent.classList.remove('scale-95', 'opacity-0');
+      }, 10);
+    }
+    
+    // Funzione per chiudere il modal della guida
+    function closeGuidaModal() {
+      guidaModalContent.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        guidaModal.classList.add('hidden');
+      }, 300);
+    }
+    
+    // Event listeners per il modal eliminazione
+    closeDeleteChatBtn.addEventListener('click', closeDeleteChatModal);
+    cancelDeleteChatBtn.addEventListener('click', closeDeleteChatModal);
+    confirmDeleteChatBtn.addEventListener('click', function() {
+      if (chatToDelete) {
+        deleteChat(chatToDelete);
+        closeDeleteChatModal();
+      }
+    });
+    
+    // Event listeners per il modal guida
+    guidaBtn.addEventListener('click', showGuidaModal);
+    guidaBtnMobile.addEventListener('click', () => {
+      showGuidaModal();
+      closeMobileSidebar();
+    });
+    closeGuidaBtn.addEventListener('click', closeGuidaModal);
+    closeGuidaBtn2.addEventListener('click', closeGuidaModal);
+    
+    // Chiudi i modal cliccando all'esterno
+    deleteChatModal.addEventListener('click', function(e) {
+      if (e.target === deleteChatModal) {
+        closeDeleteChatModal();
+      }
+    });
+    
+    guidaModal.addEventListener('click', function(e) {
+      if (e.target === guidaModal) {
+        closeGuidaModal();
+      }
+    });
+    
     // Inizializzazione
+    initApp();
     adjustTextareaHeight();
     queryInput.focus();
   </script>
