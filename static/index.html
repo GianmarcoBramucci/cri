@@ -4,18 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Assistente Croce Rossa Italiana</title>
-  <!-- Bootstrap CSS (lasciato per compatibilità con il widget) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- AOS Animation Library -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
   <!-- Marked.js per il parsing del Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
@@ -31,387 +27,472 @@
               darkgray: '#333333',
             },
           },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'typing': 'typing 1s infinite'
+          },
+          keyframes: {
+            typing: {
+              '0%': { transform: 'translateY(0px)' },
+              '28%': { transform: 'translateY(-5px)' },
+              '44%': { transform: 'translateY(0px)' },
+            }
+          }
         },
       },
     }
   </script>
   <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background: #fafafa;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e3000f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    /* Effetto di parallax per l'header */
-    .parallax-header {
-      position: relative;
-      overflow: hidden;
-      height: 220px;
-      background: linear-gradient(135deg, #e3000f 0%, #b80000 100%);
+    /* Personalizzazione della scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
     }
     
-    .parallax-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5z' fill='%23ffffff' fill-opacity='0.08'/%3E%3C/svg%3E");
-      opacity: 0.8;
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: rgba(227, 0, 15, 0.2);
+      border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(227, 0, 15, 0.4);
+    }
+    
+    /* Animazione per il loader di typing */
+    .typing-dot:nth-child(1) {
+      animation-delay: 0.2s;
+    }
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.3s;
+    }
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    /* Pattern di background con croce stilizzata */
+    .cross-pattern {
+      background-color: rgba(227, 0, 15, 0.03);
+      background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e3000f' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    /* Effetto background 3D con gradiente */
+    .bg-gradient-3d {
+      position: relative;
+      overflow: hidden;
       z-index: 0;
     }
     
-    .parallax-header-content {
-      position: relative;
-      z-index: 1;
-    }
-    
-    .header-wave {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      overflow: hidden;
-      line-height: 0;
-      transform: rotate(180deg);
-    }
-
-    .header-wave svg {
-      position: relative;
-      display: block;
-      width: calc(100% + 1.3px);
-      height: 46px;
-    }
-
-    .header-wave .shape-fill {
-      fill: #FFFFFF;
-    }
-
-    .cri-red {
-      background-color: #e3000f;
-    }
-    
-    .cri-text-red {
-      color: #e3000f;
-    }
-
-    /* Animazione per il logo della Croce Rossa */
-    @keyframes pulse-subtle {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    .pulse-animation {
-      animation: pulse-subtle 3s infinite ease-in-out;
-    }
-    
-    /* Card con effetti avanzati */
-    .card-3d {
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 30px rgba(227, 0, 15, 0.1);
-      background: white;
-      border-radius: 16px;
-      overflow: hidden;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-    }
-    
-    .card-3d:hover {
-      transform: translateY(-5px) translateZ(0);
-      box-shadow: 0 15px 35px rgba(227, 0, 15, 0.15);
-    }
-    
-    .card-header {
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      background: linear-gradient(to right, #f9f9f9, #ffffff);
-      padding: 1.25rem 1.5rem;
-    }
-    
-    /* Bottoni con effetti moderni */
-    .btn-cri {
-      background: linear-gradient(135deg, #e3000f 0%, #b80000 100%);
-      color: white;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(227, 0, 15, 0.3);
-      border: none;
-    }
-    
-    .btn-cri:hover {
-      background: linear-gradient(135deg, #ff3b4a 0%, #e3000f 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 7px 20px rgba(227, 0, 15, 0.4);
-    }
-    
-    .btn-cri::after {
+    .bg-gradient-3d::before {
       content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 5px;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.5);
-      opacity: 0;
-      border-radius: 100%;
-      transform: scale(1, 1) translate(-50%);
-      transform-origin: 50% 50%;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%);
+      transform: rotate(30deg);
+      z-index: -1;
+      opacity: 0.6;
+      pointer-events: none;
     }
     
-    .btn-cri:hover::after {
-      animation: ripple 1s ease-out;
+    /* Effetto floating per elementi di UI */
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
     }
     
-    @keyframes ripple {
-      0% {
-        transform: scale(0, 0);
-        opacity: 0.5;
-      }
-      100% {
-        transform: scale(20, 20);
-        opacity: 0;
-      }
+    .animate-floating {
+      animation: floating 5s ease-in-out infinite;
     }
     
-    /* Input con effetti moderni */
-    .input-cri {
-      transition: all 0.3s ease;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    /* Animazioni per comparsa messaggi */
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
     }
     
-    .input-cri:focus {
-      border-color: #e3000f;
-      box-shadow: 0 0 0 4px rgba(227, 0, 15, 0.15);
-      outline: none;
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
     }
     
-    /* Chat message styling */
-    .chat-message {
-      margin-bottom: 1rem;
-      padding: 1rem;
-      border-radius: 0.75rem;
-      max-width: 85%;
+    .slide-in-right {
+      animation: slideInRight 0.3s ease forwards;
     }
     
-    .user-message {
-      background-color: #f0f0f0;
-      margin-left: auto;
-      border-top-right-radius: 0;
+    .slide-in-left {
+      animation: slideInLeft 0.3s ease forwards;
     }
     
-    .assistant-message {
-      background-color: #fff;
-      border: 1px solid #eaeaea;
-      margin-right: auto;
-      border-top-left-radius: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Stile per le fonti */
-    .sources-info {
-      margin-top: 0.75rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid rgba(227, 0, 15, 0.1);
-      font-size: 0.75rem;
-      color: #666;
-    }
-
-    .sources-info ul {
-      margin-top: 0.25rem;
-    }
-
-    .sources-info li {
-      margin-bottom: 0.25rem;
-      display: flex;
-      align-items: flex-start;
-    }
-
-    .sources-info i {
-      color: #e3000f;
-      margin-right: 0.375rem;
-      font-size: 0.7rem;
-      margin-top: 0.2rem;
-    }
-
-    /* Stile per la trascrizione */
-    .transcript-container {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    /* Loading spinner */
-    .loading-spinner {
-      width: 2rem;
-      height: 2rem;
-      border: 3px solid rgba(227, 0, 15, 0.2);
-      border-radius: 50%;
-      border-top-color: #e3000f;
-      animation: spin 1s ease-in-out infinite;
+    /* Bordo dinamico pulsato per elementi attivi */
+    @keyframes borderPulse {
+      0% { border-color: rgba(227, 0, 15, 0.4); }
+      50% { border-color: rgba(227, 0, 15, 0.8); }
+      100% { border-color: rgba(227, 0, 15, 0.4); }
     }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .border-pulse {
+      animation: borderPulse 2s ease infinite;
     }
   </style>
 </head>
-<body>
-  <!-- Header con effetto parallax -->
-  <header class="parallax-header">
-    <div class="parallax-header-content flex flex-col items-center justify-center h-full text-white">
-      <img src="https://cri.it/wp-content/uploads/2019/12/logo-cri-retina-e1575638240457.png" alt="Logo Croce Rossa Italiana" class="h-16 mb-4 pulse-animation">
-      <h1 class="text-3xl font-bold">Assistente Virtuale CRI</h1>
-      <p class="text-lg opacity-90">Supporto informativo della Croce Rossa Italiana</p>
-    </div>
-    <div class="header-wave">
-      <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-        <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill"></path>
-        <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
-        <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
-      </svg>
-    </div>
-  </header>
+<body class="bg-gray-50 cross-pattern h-screen overflow-hidden">
+  <!-- Overlay per effetto glass quando si apre il menu mobile -->
+  <div id="mobileMenuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm hidden md:hidden"></div>
   
-  <!-- Container principale -->
-  <main class="container mx-auto px-4 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Colonna principale - Chat -->
-      <div class="lg:col-span-2">
-        <div class="card-3d">
-          <div class="card-header flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-gray-800">
-              <i class="fas fa-comment-dots mr-2 cri-text-red"></i>Assistente Virtuale
-            </h2>
-            <div class="flex space-x-2">
-              <button id="resetBtn" class="btn-cri px-3 py-1 text-sm rounded-md flex items-center">
-                <i class="fas fa-sync-alt mr-1"></i> Reset
-              </button>
-              <button id="transcriptBtn" class="btn-cri px-3 py-1 text-sm rounded-md flex items-center">
-                <i class="fas fa-list mr-1"></i> Trascrizione
-              </button>
-              <button id="debugBtn" class="px-3 py-1 text-sm rounded-md flex items-center bg-gray-200 hover:bg-gray-300">
-                <i class="fas fa-bug mr-1"></i> Debug
-              </button>
-            </div>
-          </div>
-          <div class="p-4">
-            <div id="chatContainer" class="mb-4 min-h-[400px] max-h-[500px] overflow-y-auto p-2">
-              <!-- I messaggi della chat verranno aggiunti qui dinamicamente -->
-              <div class="chat-message assistant-message">
-                <p>Ciao! Sono l'assistente virtuale della Croce Rossa Italiana. Come posso aiutarti oggi?</p>
-              </div>
-            </div>
-            
-            <!-- Form per l'invio del messaggio -->
-            <form id="queryForm" class="flex items-end">
-              <div class="flex-grow">
-                <label for="queryInput" class="block text-sm font-medium text-gray-700 mb-1">La tua domanda</label>
-                <textarea id="queryInput" rows="2" class="input-cri w-full resize-none" placeholder="Scrivi qui la tua domanda..."></textarea>
-              </div>
-              <button type="submit" class="btn-cri ml-3 px-4 py-3 h-12 rounded-xl flex items-center">
-                <i class="fas fa-paper-plane mr-2"></i>
-                Invia
-              </button>
-            </form>
-          </div>
+  <div class="flex h-screen">
+    <!-- Sidebar (desktop) -->
+    <aside class="hidden md:flex w-64 bg-white shadow-lg z-10 flex-col border-r border-gray-100 transition-all duration-300">
+      <div class="p-4 flex items-center border-b border-gray-100">
+        <div class="w-9 h-9 flex items-center justify-center bg-cri-red rounded-xl mr-3 shadow-md">
+          <i class="fas fa-plus text-white text-sm"></i>
+        </div>
+        <div>
+          <span class="font-bold text-gray-800 block text-sm">CRI Assistente</span>
+          <span class="text-xs text-gray-500">Croce Rossa Italiana</span>
         </div>
       </div>
       
-      <!-- Colonna laterale - Info -->
-      <div class="lg:col-span-1">
-        <!-- Card info contatti -->
-        <div class="card-3d mb-6" data-aos="fade-up" data-aos-delay="100">
-          <div class="card-header">
-            <h3 class="text-lg font-semibold text-gray-800">
-              <i class="fas fa-info-circle mr-2 cri-text-red"></i>Contatti CRI
-            </h3>
+      <nav class="flex-grow py-6 px-3">
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">Menu principale</div>
+        
+        <div class="space-y-1">
+          <div class="flex items-center px-3 py-2.5 text-cri-red bg-red-50 rounded-xl font-medium cursor-pointer transition-all hover:bg-red-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-comment-dots text-cri-red"></i>
+            </div>
+            <span>Chat</span>
           </div>
-          <div class="p-4" id="contactInfo">
-            <div class="flex justify-center items-center h-20">
-              <div class="loading-spinner"></div>
+          
+          <div id="newChatBtn" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-plus text-gray-500"></i>
+            </div>
+            <span>Nuova chat</span>
+          </div>
+          
+          <div id="historyBtn" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-history text-gray-500"></i>
+            </div>
+            <span>Cronologia</span>
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-100 my-6"></div>
+        
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">Aiuto</div>
+        
+        <div class="space-y-1">
+          <div class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-question-circle text-gray-500"></i>
+            </div>
+            <span>Guida</span>
+          </div>
+          
+          <a href="https://cri.it/" target="_blank" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-external-link-alt text-gray-500"></i>
+            </div>
+            <span>Sito CRI</span>
+          </a>
+        </div>
+      </nav>
+      
+      <div class="p-4 border-t border-gray-100">
+        <div class="flex items-center p-3 bg-gray-50 rounded-xl">
+          <div class="w-8 h-8 bg-gray-200 rounded-full mr-3 flex items-center justify-center text-sm text-gray-500 font-medium">U</div>
+          <div class="flex-grow">
+            <div class="text-sm font-medium text-gray-700">Utente</div>
+            <div class="text-xs text-gray-500">Sessione attiva</div>
+          </div>
+          <button class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Mobile menu button (visible only on mobile) -->
+    <button id="mobileMenuButton" class="md:hidden fixed top-4 left-4 z-50 bg-white w-10 h-10 rounded-xl shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Mobile sidebar (hidden by default) -->
+    <aside id="mobileSidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 transform -translate-x-full transition-transform duration-300 md:hidden">
+      <!-- Mobile sidebar content: same as desktop sidebar -->
+      <div class="p-4 flex items-center border-b border-gray-100">
+        <div class="w-9 h-9 flex items-center justify-center bg-cri-red rounded-xl mr-3 shadow-md">
+          <i class="fas fa-plus text-white text-sm"></i>
+        </div>
+        <div>
+          <span class="font-bold text-gray-800 block text-sm">CRI Assistente</span>
+          <span class="text-xs text-gray-500">Croce Rossa Italiana</span>
+        </div>
+        <button id="closeMobileMenu" class="ml-auto text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <nav class="flex-grow py-6 px-3">
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">Menu principale</div>
+        
+        <div class="space-y-1">
+          <div class="flex items-center px-3 py-2.5 text-cri-red bg-red-50 rounded-xl font-medium cursor-pointer transition-all hover:bg-red-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-comment-dots text-cri-red"></i>
+            </div>
+            <span>Chat</span>
+          </div>
+          
+          <div id="newChatBtnMobile" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-plus text-gray-500"></i>
+            </div>
+            <span>Nuova chat</span>
+          </div>
+          
+          <div id="historyBtnMobile" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-history text-gray-500"></i>
+            </div>
+            <span>Cronologia</span>
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-100 my-6"></div>
+        
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-3">Aiuto</div>
+        
+        <div class="space-y-1">
+          <div class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-question-circle text-gray-500"></i>
+            </div>
+            <span>Guida</span>
+          </div>
+          
+          <a href="https://cri.it/" target="_blank" class="flex items-center px-3 py-2.5 text-gray-600 rounded-xl font-medium cursor-pointer transition-all hover:bg-gray-100 group">
+            <div class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm mr-3 group-hover:shadow">
+              <i class="fas fa-external-link-alt text-gray-500"></i>
+            </div>
+            <span>Sito CRI</span>
+          </a>
+        </div>
+      </nav>
+      
+      <div class="p-4 border-t border-gray-100">
+        <div class="flex items-center p-3 bg-gray-50 rounded-xl">
+          <div class="w-8 h-8 bg-gray-200 rounded-full mr-3 flex items-center justify-center text-sm text-gray-500 font-medium">U</div>
+          <div class="flex-grow">
+            <div class="text-sm font-medium text-gray-700">Utente</div>
+            <div class="text-xs text-gray-500">Sessione attiva</div>
+          </div>
+          <button class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main content area -->
+    <main class="flex-grow flex flex-col relative">
+      <!-- Header con background 3D -->
+      <div class="bg-gradient-to-r from-cri-red to-cri-darkred relative h-40 md:h-32 flex items-center justify-center bg-gradient-3d">
+        <!-- Pattern background -->
+        <div class="absolute inset-0 bg-black bg-opacity-5"></div>
+        
+        <!-- Header content -->
+        <div class="relative z-10 px-6 md:px-12 w-full">
+          <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between">
+            <h1 class="text-white text-2xl md:text-3xl font-bold">
+              <span class="inline-block transform hover:scale-105 transition-transform cursor-default">
+                Assistente Croce Rossa
+              </span>
+              <i class="fas fa-plus ml-2 text-white text-xl bg-white bg-opacity-20 p-1.5 rounded-full"></i>
+            </h1>
+            
+            <!-- Theme switcher -->
+            <div class="hidden md:flex bg-white bg-opacity-20 rounded-full p-1 mt-2 md:mt-0">
+              <button id="lightModeBtn" class="text-white text-xs font-medium px-3 py-1 rounded-full bg-white bg-opacity-30">Chiaro</button>
+              <button id="darkModeBtn" class="text-white text-xs font-medium px-3 py-1 rounded-full">Scuro</button>
             </div>
           </div>
         </div>
         
-        <!-- Card link utili -->
-        <div class="card-3d" data-aos="fade-up" data-aos-delay="200">
-          <div class="card-header">
-            <h3 class="text-lg font-semibold text-gray-800">
-              <i class="fas fa-link mr-2 cri-text-red"></i>Link Utili
-            </h3>
-          </div>
-          <div class="p-4">
-            <ul class="space-y-3">
-              <li>
-                <a href="https://cri.it/" target="_blank" rel="noopener" class="flex items-center text-gray-700 hover:text-cri-red transition-colors">
-                  <i class="fas fa-external-link-alt mr-2 text-cri-red"></i>
-                  <span>Sito Ufficiale CRI</span>
-                </a>
-              </li>
-              <li>
-                <a href="https://cri.it/diventa-volontario/" target="_blank" rel="noopener" class="flex items-center text-gray-700 hover:text-cri-red transition-colors">
-                  <i class="fas fa-user-plus mr-2 text-cri-red"></i>
-                  <span>Diventa Volontario</span>
-                </a>
-              </li>
-              <li>
-                <a href="https://cri.it/sostienici/" target="_blank" rel="noopener" class="flex items-center text-gray-700 hover:text-cri-red transition-colors">
-                  <i class="fas fa-hand-holding-heart mr-2 text-cri-red"></i>
-                  <span>Sostienici</span>
-                </a>
-              </li>
-              <li>
-                <a href="https://cri.it/emergenza-ucraina/" target="_blank" rel="noopener" class="flex items-center text-gray-700 hover:text-cri-red transition-colors">
-                  <i class="fas fa-first-aid mr-2 text-cri-red"></i>
-                  <span>Emergenze Umanitarie</span>
-                </a>
-              </li>
-            </ul>
+        <!-- Wave at bottom -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-6 md:h-8 text-gray-50 fill-current">
+            <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Suggerimenti rapidi -->
+      <div class="px-4 py-3 bg-gray-50">
+        <div class="max-w-4xl mx-auto">
+          <div class="text-sm font-medium text-gray-500 mb-2">Domande frequenti:</div>
+          <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar">
+            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+              Come diventare volontario?
+            </button>
+            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+              Corsi di primo soccorso
+            </button>
+            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+              Donare sangue
+            </button>
+            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+              Emergenze attive
+            </button>
+            <button class="whitespace-nowrap px-4 py-2 bg-white text-sm text-gray-700 rounded-full shadow-sm hover:shadow border border-gray-200 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-cri-red focus:ring-opacity-30">
+              Come donare
+            </button>
           </div>
         </div>
       </div>
-    </div>
-  </main>
+      
+      <!-- Chat area -->
+      <div class="relative flex-grow overflow-hidden">
+        <div id="chatContainer" class="absolute inset-0 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+          <div class="max-w-4xl mx-auto space-y-6 pb-20">
+            <!-- Messaggio di benvenuto dell'assistente con illustrazione -->
+            <div class="flex flex-col md:flex-row gap-4 items-center p-6 bg-white rounded-2xl shadow-md border border-gray-100 slide-in-left">
+              <div class="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 bg-red-50 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-robot text-cri-red text-3xl"></i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-lg md:text-xl font-semibold text-gray-800 mb-2">Benvenuto all'Assistente CRI</h2>
+                <p class="text-gray-600">Sono qui per rispondere alle tue domande sulla Croce Rossa Italiana, fornire informazioni sui servizi e guidarti nelle attività di volontariato. Come posso aiutarti oggi?</p>
+              </div>
+            </div>
+            
+            <!-- I messaggi chat saranno inseriti qui dinamicamente -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Input area con effetto floating -->
+      <div class="relative z-10">
+        <div class="absolute -top-7 left-0 right-0 overflow-hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-7 text-white fill-current">
+            <path d="M0,0V7.23C0,65.52,268.63,112.77,600,112.77S1200,65.52,1200,7.23V0Z" class="shape-fill"></path>
+          </svg>
+        </div>
+        
+        <div class="bg-white border-t border-gray-200 p-4 md:p-6">
+          <div class="max-w-4xl mx-auto">
+            <!-- Contenitore per pulsanti di azione e input -->
+            <form id="queryForm" class="relative">
+              <div class="flex items-center gap-2 mb-2">
+                <button type="button" id="resetBtn" class="flex items-center justify-center w-9 h-9 text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+                <div class="relative flex-grow">
+                  <div class="relative flex items-end">
+                    <div class="relative flex-grow border-2 border-gray-200 rounded-2xl bg-white shadow-sm transition-all focus-within:border-cri-red focus-within:shadow-lg">
+                      <textarea 
+                        id="queryInput" 
+                        class="w-full bg-transparent border-none rounded-2xl py-3 px-4 pr-12 resize-none focus:ring-0 focus:outline-none custom-scrollbar max-h-32"
+                        placeholder="Scrivi qui la tua domanda..."
+                        rows="1"
+                      ></textarea>
+                      <button 
+                        type="button" 
+                        id="sendBtn" 
+                        class="absolute right-2 bottom-2 text-cri-red disabled:text-gray-300 rounded-full p-2 hover:bg-red-50 transition-colors disabled:hover:bg-transparent"
+                        disabled
+                      >
+                        <i class="fas fa-paper-plane"></i>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div class="flex justify-between items-center text-xs text-gray-500 mt-1.5 px-1">
+                    <div>
+                      <span class="inline-flex items-center gap-1">
+                        <span class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs">Enter</span> 
+                        <span>per inviare</span>
+                      </span>
+                      <span class="mx-2">·</span>
+                      <span class="inline-flex items-center gap-1">
+                        <span class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs">Shift</span>+<span class="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs">Enter</span> 
+                        <span>per andare a capo</span>
+                      </span>
+                    </div>
+                    <div class="text-xs text-gray-400 hidden md:block">
+                      Powered by <span class="font-medium">CRI</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
   
-  <!-- Modal per la trascrizione -->
-  <div id="transcriptModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
-      <div class="border-b px-4 py-3 flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-gray-800">
-          <i class="fas fa-list mr-2 cri-text-red"></i>Trascrizione della conversazione
+  <!-- Modal per la cronologia della conversazione -->
+  <div id="transcriptModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="transcriptModalContent">
+      <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+          <i class="fas fa-history mr-2 text-cri-red"></i>
+          Cronologia della conversazione
         </h3>
-        <button id="closeTranscriptBtn" class="text-gray-500 hover:text-gray-700">
+        <button id="closeTranscriptBtn" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div class="p-4 transcript-container" id="transcriptContent">
+      <div id="transcriptContent" class="px-6 py-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
         <div class="flex justify-center items-center h-20">
-          <div class="loading-spinner"></div>
+          <div class="w-8 h-8 border-3 border-t-transparent border-cri-red rounded-full animate-spin"></div>
         </div>
       </div>
-      <div class="border-t px-4 py-3 flex justify-end">
-        <button id="closeTranscriptBtn2" class="btn-cri px-4 py-2 rounded-md">
+      <div class="border-t border-gray-200 px-6 py-4 flex justify-between items-center">
+        <button id="clearHistoryBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">
+          <i class="fas fa-trash-alt mr-1"></i> Cancella cronologia
+        </button>
+        <button id="closeTranscriptBtn2" class="px-4 py-2 bg-cri-red text-white rounded-lg text-sm hover:bg-cri-darkred transition-colors">
           Chiudi
         </button>
       </div>
     </div>
   </div>
   
-  <!-- Javascript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script>
-    // Inizializza le animazioni AOS
-    AOS.init({
-      duration: 800,
-      once: true
-    });
-    
-    // Debug mode toggle
-    window.debugMode = false; // Set to true to enable debug overlays
+    // Elementi DOM
+    const queryForm = document.getElementById('queryForm');
+    const queryInput = document.getElementById('queryInput');
+    const chatContainer = document.getElementById('chatContainer');
+    const sendBtn = document.getElementById('sendBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const newChatBtn = document.getElementById('newChatBtn');
+    const newChatBtnMobile = document.getElementById('newChatBtnMobile');
+    const historyBtn = document.getElementById('historyBtn');
+    const historyBtnMobile = document.getElementById('historyBtnMobile');
+    const transcriptModal = document.getElementById('transcriptModal');
+    const transcriptModalContent = document.getElementById('transcriptModalContent');
+    const transcriptContent = document.getElementById('transcriptContent');
+    const closeTranscriptBtn = document.getElementById('closeTranscriptBtn');
+    const closeTranscriptBtn2 = document.getElementById('closeTranscriptBtn2');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const mobileMenuButton = document.getElementById('mobileMenuButton');
+    const closeMobileMenu = document.getElementById('closeMobileMenu');
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+    const lightModeBtn = document.getElementById('lightModeBtn');
+    const darkModeBtn = document.getElementById('darkModeBtn');
     
     // Variabili per la gestione della sessione
     let sessionId = localStorage.getItem('cri_session_id');
@@ -419,150 +500,127 @@
       sessionId = 'user_' + Math.random().toString(36).substring(2, 8);
       localStorage.setItem('cri_session_id', sessionId);
     }
-    console.log("Using session ID:", sessionId);
     let isLoading = false;
     let conversationHistory = [];
     
-    // Elementi DOM
-    const queryForm = document.getElementById('queryForm');
-    const queryInput = document.getElementById('queryInput');
-    const chatContainer = document.getElementById('chatContainer');
-    const resetBtn = document.getElementById('resetBtn');
-    const transcriptBtn = document.getElementById('transcriptBtn');
-    const transcriptModal = document.getElementById('transcriptModal');
-    const transcriptContent = document.getElementById('transcriptContent');
-    const closeTranscriptBtn = document.getElementById('closeTranscriptBtn');
-    const closeTranscriptBtn2 = document.getElementById('closeTranscriptBtn2');
-    const contactInfo = document.getElementById('contactInfo');
-    const debugBtn = document.getElementById('debugBtn');
-    
-    // API base URL
+    // API base URL (modificare in base alla configurazione del server)
     const API_BASE_URL = '/api';
+    
+    // Funzione per adattare l'altezza della textarea
+    function adjustTextareaHeight() {
+      queryInput.style.height = 'auto';
+      queryInput.style.height = Math.min(queryInput.scrollHeight, 128) + 'px'; // 128px = 8rem (max-h-32)
+    }
     
     // Funzione per aggiungere un messaggio alla chat
     function addMessage(text, isUser = false, sources = null) {
       const messageDiv = document.createElement('div');
-      messageDiv.classList.add('chat-message');
-      messageDiv.classList.add(isUser ? 'user-message' : 'assistant-message');
       
-      // Processa il markdown se è un messaggio dell'assistente
-      if (!isUser) {
-        messageDiv.innerHTML = marked.parse(text);
+      if (isUser) {
+        messageDiv.className = 'flex justify-end slide-in-right';
+        messageDiv.innerHTML = `
+          <div class="bg-cri-red bg-opacity-5 border border-cri-red border-opacity-10 p-4 rounded-2xl rounded-tr-none max-w-md md:max-w-2xl shadow-sm">
+            <div class="text-gray-800">${text}</div>
+          </div>
+        `;
+      } else {
+        messageDiv.className = 'flex justify-start slide-in-left';
         
-        // Aggiungi le fonti se disponibili
+        // Converter il markdown
+        const htmlContent = marked.parse(text);
+        
+        let sourcesHTML = '';
         if (sources && sources.length > 0) {
-          const sourcesDiv = document.createElement('div');
-          sourcesDiv.classList.add('sources-info', 'mt-3', 'pt-2', 'border-t', 'border-gray-200', 'text-xs', 'text-gray-500');
-          
-          // Crea un header per le fonti con un pulsante per espandere/collassare
-          const sourcesHeader = document.createElement('div');
-          sourcesHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer');
-          sourcesHeader.innerHTML = `
-            <p class="font-semibold">Fonti:</p>
-            <button class="text-xs text-cri-red hover:text-cri-darkred" title="Mostra/Nascondi fonti">
-              <i class="fas fa-chevron-down toggle-icon"></i>
-            </button>
-          `;
-          sourcesDiv.appendChild(sourcesHeader);
-          
-          // Contenitore per la lista delle fonti (inizialmente nascosto)
-          const sourcesContent = document.createElement('div');
-          sourcesContent.classList.add('sources-content', 'hidden', 'mt-2');
-          sourcesDiv.appendChild(sourcesContent);
-          
-          const sourcesList = document.createElement('ul');
-          sourcesList.classList.add('pl-2');
-          
-          // Tieni traccia dei documenti già aggiunti per evitare duplicati
-          const addedSources = new Set();
-          
+          // Preparazione delle fonti
+          const uniqueSources = new Set();
           sources.forEach(source => {
             if (source.metadata && source.metadata.filename) {
-              // Evita duplicati basati sul nome del file
-              if (!addedSources.has(source.metadata.filename)) {
-                addedSources.add(source.metadata.filename);
-                
-                const sourceItem = document.createElement('li');
-                sourceItem.classList.add('flex', 'items-start', 'mb-1');
-                
-                // Determina un titolo leggibile dal nome del file
-                let displayTitle = source.metadata.filename.replace('.md', '');
-                
-                // Se abbiamo un chunk_title, usiamo quello
-                if (source.metadata.chunk_title) {
-                  displayTitle = source.metadata.chunk_title;
-                }
-                
-                // Crea il tooltip con più informazioni sulla fonte
-                const tooltipInfo = [];
-                if (source.metadata.document_type) {
-                  tooltipInfo.push(`Tipo: ${source.metadata.document_type}`);
-                }
-                if (source.metadata.source) {
-                  tooltipInfo.push(`Percorso: ${source.metadata.source}`);
-                }
-                
-                const tooltipText = tooltipInfo.length > 0 ? tooltipInfo.join('\n') : 'Informazioni aggiuntive non disponibili';
-                
-                sourceItem.innerHTML = `
-                  <i class="fas fa-file-alt mr-1 mt-0.5 text-cri-red"></i>
-                  <span title="${tooltipText}">${displayTitle}</span>
-                `;
-                sourcesList.appendChild(sourceItem);
-              }
+              uniqueSources.add(source.metadata.filename);
             }
           });
           
-          // Aggiungi una riga che mostra quanti documenti sono stati consultati
-          const sourceCount = document.createElement('p');
-          sourceCount.classList.add('text-xs', 'text-gray-400', 'mt-1');
-          sourceCount.textContent = `${addedSources.size} ${addedSources.size === 1 ? 'documento consultato' : 'documenti consultati'}`;
-          
-          sourcesContent.appendChild(sourcesList);
-          sourcesContent.appendChild(sourceCount);
-          messageDiv.appendChild(sourcesDiv);
-          
-          // Aggiungi l'evento per espandere/collassare la sezione delle fonti
-          sourcesHeader.addEventListener('click', () => {
-            const content = sourcesHeader.parentElement.querySelector('.sources-content');
-            const icon = sourcesHeader.querySelector('.toggle-icon');
-            
-            if (content.classList.contains('hidden')) {
-              content.classList.remove('hidden');
-              icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-            } else {
-              content.classList.add('hidden');
-              icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-            }
-          });
+          sourcesHTML = `
+            <div class="mt-3 pt-3 border-t border-gray-200">
+              <div class="flex justify-between items-center cursor-pointer sources-toggle">
+                <p class="text-xs font-semibold text-gray-500">Fonti: ${uniqueSources.size}</p>
+                <button class="text-xs text-cri-red hover:text-cri-darkred p-1">
+                  <i class="fas fa-chevron-down toggle-icon"></i>
+                </button>
+              </div>
+              <div class="sources-content hidden mt-2 text-xs text-gray-500">
+                <ul class="space-y-1">
+                  ${Array.from(uniqueSources).map(source => `
+                    <li class="flex items-start">
+                      <i class="fas fa-file-alt mr-1.5 mt-0.5 text-cri-red opacity-70"></i>
+                      <span>${source.replace('.md', '')}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              </div>
+            </div>
+          `;
         }
-      } else {
-        messageDiv.textContent = text;
+        
+        messageDiv.innerHTML = `
+          <div class="bg-white p-4 rounded-2xl rounded-tl-none max-w-md md:max-w-2xl shadow-md border border-gray-100">
+            <div class="prose prose-sm max-w-none">${htmlContent}</div>
+            ${sourcesHTML}
+          </div>
+        `;
       }
       
+      // Aggiungi l'evento toggle per le fonti
       chatContainer.appendChild(messageDiv);
+      
+      // Aggiungi evento per toggle fonti se presente
+      const toggleButton = messageDiv.querySelector('.sources-toggle');
+      if (toggleButton) {
+        toggleButton.addEventListener('click', function() {
+          const content = this.nextElementSibling;
+          const icon = this.querySelector('.toggle-icon');
+          
+          if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+          } else {
+            content.classList.add('hidden');
+            icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+          }
+        });
+      }
+      
+      // Scroll to bottom
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
     
-    // Funzione per mostrare il loader nel container della chat
-    function showChatLoader() {
-      const loaderDiv = document.createElement('div');
-      loaderDiv.id = 'chatLoader';
-      loaderDiv.classList.add('flex', 'justify-center', 'my-4');
-      loaderDiv.innerHTML = '<div class="loading-spinner"></div>';
-      chatContainer.appendChild(loaderDiv);
+    // Funzione per mostrare il loader di "sta scrivendo..."
+    function showTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typingIndicator';
+      typingDiv.className = 'flex justify-start slide-in-left';
+      typingDiv.innerHTML = `
+        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-md border border-gray-100 flex items-center">
+          <div class="flex space-x-1 px-2">
+            <div class="w-2 h-2 bg-cri-red rounded-full animate-typing typing-dot"></div>
+            <div class="w-2 h-2 bg-cri-red rounded-full animate-typing typing-dot"></div>
+            <div class="w-2 h-2 bg-cri-red rounded-full animate-typing typing-dot"></div>
+          </div>
+          <span class="text-xs text-gray-500 ml-2">Assistente sta scrivendo...</span>
+        </div>
+      `;
+      chatContainer.appendChild(typingDiv);
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
     
     // Funzione per rimuovere il loader
-    function removeChatLoader() {
-      const loader = document.getElementById('chatLoader');
-      if (loader) {
-        loader.remove();
+    function removeTypingIndicator() {
+      const indicator = document.getElementById('typingIndicator');
+      if (indicator) {
+        indicator.remove();
       }
     }
     
-    // Funzione per inviare una domanda al backend - VERSIONE AGGIORNATA
+    // Funzione per inviare una domanda al backend
     async function sendQuestion(question) {
       try {
         // Verifica che ci sia una sessione
@@ -572,50 +630,23 @@
         }
         
         // Mostra l'indicatore di digitazione
-        showChatLoader();
+        showTypingIndicator();
         
         // Costruisci la cronologia della conversazione da inviare al backend
-        // Questo è fondamentale per garantire che tutte le informazioni personali vengano incluse
         const conversationHistory = [];
-        const messages = document.querySelectorAll('.chat-message');
+        
+        // Ottieni tutti i messaggi tranne il primo di benvenuto con l'illustrazione
+        const messages = Array.from(chatContainer.querySelectorAll('.flex > div')).slice(1);
         
         messages.forEach(msg => {
-          const isBot = msg.classList.contains('assistant-message');
-          let content = "";
+          const isBot = !msg.classList.contains('bg-cri-red');
+          let content = msg.textContent.trim();
           
-          if (isBot) {
-            // Per i messaggi del bot, estrai solo il contenuto principale (no timestamp)
-            // Rimuovi elementi che non sono parte del contenuto principale
-            let msgText = msg.innerHTML;
-            
-            // Rimuovi la parte delle fonti se presente
-            const sourcesDiv = msg.querySelector('.sources-info');
-            if (sourcesDiv) {
-              msgText = msgText.replace(sourcesDiv.outerHTML, '');
-            }
-            
-            // Rimuovi il timestamp se presente
-            const timeDiv = msg.querySelector('.message-time');
-            if (timeDiv) {
-              msgText = msgText.replace(timeDiv.outerHTML, '');
-            }
-            
-            // Converti il contenuto HTML in testo
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = msgText;
-            content = tempDiv.textContent.trim();
-          } else {
-            // Per i messaggi utente, estrai il contenuto principale (no timestamp)
-            content = msg.textContent.trim();
-            
-            // Rimuovi il timestamp se presente
-            const timeDiv = msg.querySelector('.message-time');
-            if (timeDiv) {
-              content = content.replace(timeDiv.textContent, '').trim();
-            }
+          // Rimuovi il testo delle fonti se presente
+          if (isBot && content.includes('Fonti:')) {
+            content = content.substring(0, content.indexOf('Fonti:')).trim();
           }
           
-          // Aggiungi alla cronologia solo se c'è contenuto valido
           if (content) {
             conversationHistory.push({
               type: isBot ? "assistant" : "user",
@@ -623,8 +654,6 @@
             });
           }
         });
-        
-        console.log("Inviando cronologia completa:", conversationHistory);
         
         // Chiamata API al backend
         const response = await fetch(`${API_BASE_URL}/query`, {
@@ -635,72 +664,38 @@
           body: JSON.stringify({
             query: question,
             session_id: sessionId,
-            conversation_history: conversationHistory  // Invio della cronologia completa
+            conversation_history: conversationHistory
           })
         });
         
         const data = await response.json();
         
-        // Rimuovi il loader
-        removeChatLoader();
-        
-        if (response.ok) {
-          // Log dei documenti utilizzati nella console
-          console.log("Connessione al database riuscita!");
-          console.log("Documenti utilizzati per generare la risposta:", data.source_documents);
+        // Simula un piccolo ritardo per una UX più naturale
+        setTimeout(() => {
+          // Rimuovi l'indicatore di digitazione
+          removeTypingIndicator();
           
-          if (data.condensed_question) {
-            console.log("Domanda riformulata:", data.condensed_question);
-            
-            // Display condensed question in debug overlay if enabled
-            if (window.debugMode) {
-              const debugInfo = document.createElement('div');
-              debugInfo.classList.add('debug-overlay', 'p-2', 'my-1', 'text-xs', 'bg-gray-100', 'border', 'border-gray-300', 'rounded');
-              debugInfo.innerHTML = `
-                <div class="font-medium text-gray-700">Debug - Riformulazione:</div>
-                <div class="flex">
-                  <div class="font-mono mr-2">Originale:</div>
-                  <div class="text-gray-700">${question}</div>
-                </div>
-                <div class="flex">
-                  <div class="font-mono mr-2">Riformulata:</div>
-                  <div class="text-indigo-700">${data.condensed_question}</div>
-                </div>
-              `;
-              chatContainer.appendChild(debugInfo);
-              chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
-            
-            // Richiedi la trascrizione per mostrare la memoria della conversazione
-            fetch(`${API_BASE_URL}/transcript?session_id=${sessionId}`)
-              .then(response => response.json())
-              .then(transcriptData => {
-                if (transcriptData.transcript) {
-                  console.log("Memoria della conversazione utilizzata per la riformulazione:", 
-                    transcriptData.transcript.slice(0, -1)); // Mostra la conversazione precedente
-                }
-              })
-              .catch(error => {
-                console.error("Errore nel recupero della memoria della conversazione:", error);
-              });
+          if (response.ok) {
+            // Aggiungi la risposta dell'assistente alla chat
+            addMessage(data.answer, false, data.source_documents);
+          } else {
+            // Gestione degli errori
+            addMessage("Mi dispiace, si è verificato un errore. Riprova più tardi o contatta il supporto.");
+            console.error("Errore nella richiesta:", data);
           }
           
-          // Aggiungi la risposta dell'assistente alla chat
-          addMessage(data.answer, false, data.source_documents);
-          conversationHistory.push({ type: "assistant", content: data.answer });
-        } else {
-          // Gestione degli errori
-          addMessage("Mi dispiace, si è verificato un errore. Riprova più tardi o contatta il supporto.");
-          console.error("Errore nella richiesta:", data);
-        }
+          isLoading = false;
+        }, 700);
+        
       } catch (error) {
         // Gestione degli errori di rete
-        removeChatLoader();
-        addMessage("Mi dispiace, si è verificato un errore di connessione. Verifica la tua connessione e riprova.");
-        console.error("Errore di rete:", error);
+        setTimeout(() => {
+          removeTypingIndicator();
+          addMessage("Mi dispiace, si è verificato un errore di connessione. Verifica la tua connessione e riprova.");
+          console.error("Errore di rete:", error);
+          isLoading = false;
+        }, 500);
       }
-      
-      isLoading = false;
     }
     
     // Gestione dell'invio del messaggio
@@ -712,10 +707,13 @@
       
       // Aggiungi il messaggio dell'utente alla chat
       addMessage(query, true);
-      conversationHistory.push({ type: "user", content: query });
       
       // Pulisci l'input
       queryInput.value = '';
+      queryInput.style.height = 'auto';
+      
+      // Disabilita il pulsante di invio
+      sendBtn.disabled = true;
       
       // Imposta lo stato di caricamento
       isLoading = true;
@@ -724,171 +722,201 @@
       await sendQuestion(query);
     });
     
-    // Gestione del reset della conversazione
-    resetBtn.addEventListener('click', async () => {
-      if (isLoading) return;
-      
-      try {
-        const response = await fetch(`${API_BASE_URL}/reset`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            session_id: sessionId
-          }),
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          // Pulisci la chat
-          chatContainer.innerHTML = '';
-          conversationHistory = [];
-          
-          // Aggiungi il messaggio di benvenuto
-          addMessage("Ciao! Sono l'assistente virtuale della Croce Rossa Italiana. Come posso aiutarti oggi?");
-        } else {
-          console.error("Errore nel reset della conversazione:", data);
+    // Gestione di Enter e Shift+Enter nella textarea
+    queryInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        // Se è premuto Shift+Enter, consenti l'andata a capo
+        if (e.shiftKey) {
+          return;
         }
-      } catch (error) {
-        console.error("Errore di rete:", error);
+        
+        // Se è premuto solo Enter, invia il messaggio
+        e.preventDefault(); // Previeni l'andata a capo predefinita
+        
+        // Simula il click sul pulsante Invia se c'è testo e non siamo in stato di caricamento
+        if (this.value.trim() && !isLoading) {
+          queryForm.dispatchEvent(new Event('submit'));
+        }
       }
     });
-    
-    // Gestione della visualizzazione della trascrizione
-    transcriptBtn.addEventListener('click', async () => {
-      transcriptModal.classList.remove('hidden');
-      
-      try {
-        const response = await fetch(`${API_BASE_URL}/transcript?session_id=${sessionId}`);
-        const data = await response.json();
-        
-        if (response.ok && data.transcript) {
-          transcriptContent.innerHTML = '';
-          
-          if (data.transcript.length === 0) {
-            transcriptContent.innerHTML = '<p class="text-gray-500 text-center">Nessuna conversazione presente.</p>';
-          } else {
-            data.transcript.forEach(item => {
-              const userDiv = document.createElement('div');
-              userDiv.classList.add('mb-3');
-              userDiv.innerHTML = `
-                <p class="font-semibold text-sm text-gray-600">Tu:</p>
-                <p class="p-2 bg-gray-100 rounded-lg">${item.user}</p>
-              `;
-              
-              const assistantDiv = document.createElement('div');
-              assistantDiv.classList.add('mb-5');
-              assistantDiv.innerHTML = `
-                <p class="font-semibold text-sm text-gray-600">Assistente:</p>
-                <div class="p-2 bg-white border border-gray-200 rounded-lg">${marked.parse(item.assistant)}</div>
-              `;
-              
-              transcriptContent.appendChild(userDiv);
-              transcriptContent.appendChild(assistantDiv);
-            });
-          }
-        } else {
-          transcriptContent.innerHTML = '<p class="text-red-500 text-center">Errore nel caricamento della trascrizione.</p>';
-          console.error("Errore nel caricamento della trascrizione:", data);
-        }
-      } catch (error) {
-        transcriptContent.innerHTML = '<p class="text-red-500 text-center">Errore di connessione.</p>';
-        console.error("Errore di rete:", error);
-      }
-    });
-    
-    // Chiusura del modal della trascrizione
-    closeTranscriptBtn.addEventListener('click', () => {
-      transcriptModal.classList.add('hidden');
-    });
-    
-    closeTranscriptBtn2.addEventListener('click', () => {
-      transcriptModal.classList.add('hidden');
-    });
-    
-    // Caricamento delle informazioni di contatto all'avvio
-    async function loadContactInfo() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/contact`);
-        const data = await response.json();
-        
-        if (response.ok) {
-          contactInfo.innerHTML = `
-            <h4 class="font-semibold mb-2">${data.name}</h4>
-            <p class="text-sm text-gray-600 mb-3">${data.description}</p>
-            <div class="space-y-2">
-              <p class="flex items-center text-sm">
-                <i class="fas fa-globe w-5 text-cri-red"></i>
-                <a href="${data.website}" target="_blank" class="ml-2 text-cri-red hover:underline">${data.website}</a>
-              </p>
-              <p class="flex items-center text-sm">
-                <i class="fas fa-envelope w-5 text-cri-red"></i>
-                <a href="mailto:${data.email}" class="ml-2 text-gray-600">${data.email}</a>
-              </p>
-              <p class="flex items-center text-sm">
-                <i class="fas fa-phone w-5 text-cri-red"></i>
-                <span class="ml-2 text-gray-600">${data.phone}</span>
-              </p>
-              <p class="flex items-start text-sm">
-                <i class="fas fa-map-marker-alt w-5 mt-1 text-cri-red"></i>
-                <span class="ml-2 text-gray-600">${data.headquarters}</span>
-              </p>
-            </div>
-          `;
-        } else {
-          contactInfo.innerHTML = '<p class="text-red-500 text-center">Errore nel caricamento delle informazioni di contatto.</p>';
-          console.error("Errore nel caricamento delle informazioni di contatto:", data);
-        }
-      } catch (error) {
-        contactInfo.innerHTML = '<p class="text-red-500 text-center">Errore di connessione.</p>';
-        console.error("Errore di rete:", error);
-      }
-    }
-    
-    // Carica le informazioni di contatto all'avvio
-    loadContactInfo();
     
     // Adatta l'altezza della textarea mentre si scrive
     queryInput.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = (this.scrollHeight) + 'px';
+      adjustTextareaHeight();
+      sendBtn.disabled = this.value.trim() === '';
     });
     
-    // Funzioni di utilità per il click-to-copy
-    document.addEventListener('click', function(e) {
-      if (e.target && e.target.classList.contains('copy-code-btn')) {
-        const codeBlock = e.target.parentElement.querySelector('code');
-        const text = codeBlock.textContent;
-        
-        navigator.clipboard.writeText(text).then(() => {
-          e.target.textContent = 'Copiato!';
-          setTimeout(() => {
-            e.target.textContent = 'Copia';
-          }, 2000);
+    // Aggiungi funzionalità al pulsante invio
+    sendBtn.addEventListener('click', function() {
+      if (queryInput.value.trim() && !isLoading) {
+        queryForm.dispatchEvent(new Event('submit'));
+      }
+    });
+    
+    // Gestione della nuova chat (reset)
+    function resetChat() {
+      if (isLoading) return;
+      
+      fetch(`${API_BASE_URL}/reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          session_id: sessionId
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (response.ok) {
+          // Pulisci la chat mantenendo solo il messaggio di benvenuto
+          const welcomeMessage = chatContainer.firstElementChild;
+          chatContainer.innerHTML = '';
+          chatContainer.appendChild(welcomeMessage);
+          conversationHistory = [];
+        } else {
+          console.error("Errore nel reset della conversazione:", data);
+        }
+      })
+      .catch(error => {
+        console.error("Errore di rete:", error);
+      });
+    }
+    
+    resetBtn.addEventListener('click', resetChat);
+    newChatBtn.addEventListener('click', resetChat);
+    newChatBtnMobile.addEventListener('click', () => {
+      resetChat();
+      closeMobileMenu.click();
+    });
+    
+    // Gestione dell'apertura del modal per la cronologia
+    function openHistoryModal() {
+      transcriptModal.classList.remove('hidden');
+      setTimeout(() => {
+        transcriptModalContent.classList.remove('scale-95', 'opacity-0');
+      }, 10);
+      
+      fetch(`${API_BASE_URL}/transcript?session_id=${sessionId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (response.ok && data.transcript) {
+            transcriptContent.innerHTML = '';
+            
+            if (data.transcript.length === 0) {
+              transcriptContent.innerHTML = '<p class="text-gray-500 text-center py-6">Nessuna conversazione presente.</p>';
+            } else {
+              const conversationsEl = document.createElement('div');
+              conversationsEl.className = 'space-y-8';
+              
+              data.transcript.forEach((item, index) => {
+                const conversationEl = document.createElement('div');
+                conversationEl.className = 'border border-gray-200 rounded-xl overflow-hidden';
+                
+                conversationEl.innerHTML = `
+                  <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                    <div class="font-medium text-sm text-gray-700">Conversazione ${index + 1}</div>
+                    <button class="text-xs text-gray-500 hover:text-gray-700 p-1">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                  <div class="p-4 space-y-4">
+                    <div>
+                      <p class="text-xs text-gray-500 mb-1">Tu:</p>
+                      <p class="p-2 bg-gray-50 rounded-lg text-sm">${item.user}</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500 mb-1">Assistente:</p>
+                      <div class="p-2 bg-white border border-gray-100 rounded-lg shadow-sm text-sm">${marked.parse(item.assistant)}</div>
+                    </div>
+                  </div>
+                `;
+                
+                conversationsEl.appendChild(conversationEl);
+              });
+              
+              transcriptContent.appendChild(conversationsEl);
+            }
+          } else {
+            transcriptContent.innerHTML = '<p class="text-red-500 text-center py-6">Errore nel caricamento della cronologia.</p>';
+            console.error("Errore nel caricamento della cronologia:", data);
+          }
+        })
+        .catch(error => {
+          transcriptContent.innerHTML = '<p class="text-red-500 text-center py-6">Errore di connessione.</p>';
+          console.error("Errore di rete:", error);
         });
+    }
+    
+    historyBtn.addEventListener('click', openHistoryModal);
+    historyBtnMobile.addEventListener('click', () => {
+      openHistoryModal();
+      closeMobileMenu.click();
+    });
+    
+    // Chiusura del modal della cronologia
+    function closeHistoryModal() {
+      transcriptModalContent.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        transcriptModal.classList.add('hidden');
+      }, 300);
+    }
+    
+    closeTranscriptBtn.addEventListener('click', closeHistoryModal);
+    closeTranscriptBtn2.addEventListener('click', closeHistoryModal);
+    
+    // Click all'esterno del modal per chiuderlo
+    transcriptModal.addEventListener('click', (e) => {
+      if (e.target === transcriptModal) {
+        closeHistoryModal();
       }
     });
     
-    // Toggle della modalità debug
-    debugBtn.addEventListener('click', () => {
-      window.debugMode = !window.debugMode;
-      
-      // Aggiorna l'aspetto del pulsante
-      if (window.debugMode) {
-        debugBtn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
-        debugBtn.classList.add('bg-indigo-500', 'text-white', 'hover:bg-indigo-600');
-      } else {
-        debugBtn.classList.remove('bg-indigo-500', 'text-white', 'hover:bg-indigo-600');
-        debugBtn.classList.add('bg-gray-200', 'hover:bg-gray-300');
-        
-        // Rimuovi i box di debug esistenti
-        document.querySelectorAll('.debug-overlay').forEach(el => el.remove());
-      }
-      
-      console.log("Modalità debug:", window.debugMode ? "attivata" : "disattivata");
+    // Gestione del menu mobile
+    mobileMenuButton.addEventListener('click', function() {
+      mobileSidebar.classList.remove('-translate-x-full');
+      mobileMenuOverlay.classList.remove('hidden');
     });
+    
+    function closeMobileSidebar() {
+      mobileSidebar.classList.add('-translate-x-full');
+      mobileMenuOverlay.classList.add('hidden');
+    }
+    
+    closeMobileMenu.addEventListener('click', closeMobileSidebar);
+    mobileMenuOverlay.addEventListener('click', closeMobileSidebar);
+    
+    // Gestione del cambio tema (per ora solo UI, non funzionale)
+    lightModeBtn.addEventListener('click', function() {
+      lightModeBtn.classList.add('bg-white', 'bg-opacity-30');
+      darkModeBtn.classList.remove('bg-white', 'bg-opacity-30');
+    });
+    
+    darkModeBtn.addEventListener('click', function() {
+      darkModeBtn.classList.add('bg-white', 'bg-opacity-30');
+      lightModeBtn.classList.remove('bg-white', 'bg-opacity-30');
+    });
+    
+    // Gestione dei suggerimenti rapidi (click sui bottoni delle domande frequenti)
+    document.querySelectorAll('.overflow-x-auto button').forEach(button => {
+      button.addEventListener('click', function() {
+        if (isLoading) return;
+        
+        const question = this.textContent.trim();
+        queryInput.value = question;
+        adjustTextareaHeight();
+        sendBtn.disabled = false;
+        
+        // Simula l'invio dopo un breve ritardo
+        setTimeout(() => {
+          queryForm.dispatchEvent(new Event('submit'));
+        }, 100);
+      });
+    });
+    
+    // Inizializzazione
+    adjustTextareaHeight();
+    queryInput.focus();
   </script>
 </body>
 </html>
