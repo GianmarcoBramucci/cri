@@ -39,6 +39,7 @@ class RAGEngine:
         logger.info("Initializing RAG Engine with provided memory instance")
         self._initialization_failed = False # Initialize the flag
         self.memory = memory # Use the provided session-specific memory instance
+        self._qdrant_initialized = False  # Track Qdrant initialization
         
         try:
             # Set the global LlamaIndex settings
@@ -64,12 +65,17 @@ class RAGEngine:
             
             logger.info("RAG Engine initialization complete")
         except Exception as e:
-            logger.error("Failed to initialize RAG Engine", error=str(e))
+            logger.error(f"Failed to initialize RAG Engine: {str(e)}", exc_info=True)
             # Set flag to indicate initialization failure
             self._initialization_failed = True
     
     def _initialize_qdrant(self) -> None:
         """Initialize connection to Qdrant and set up the vector store."""
+        # Skip if already initialized to prevent multiple connections
+        if self._qdrant_initialized:
+            logger.debug("Qdrant already initialized, skipping")
+            return
+            
         try:
             logger.info("Connecting to Qdrant", 
                         url=settings.QDRANT_URL, 
@@ -102,9 +108,10 @@ class RAGEngine:
             logger.info("Cohere reranker disabled for compatibility")
             
             logger.info("Qdrant and retrievers initialized successfully")
+            self._qdrant_initialized = True
             
         except Exception as e:
-            logger.error("Failed to initialize Qdrant", error=str(e), stack_trace=traceback.format_exc())
+            logger.error(f"Failed to initialize Qdrant: {str(e)}", exc_info=True)
             raise
     
     def _direct_search(self, query: str) -> List[TextNode]:
@@ -124,7 +131,7 @@ class RAGEngine:
             )
             
             if not results:
-                logger.warning("No results found in direct search", query=query)
+                logger.warning(f"No results found in direct search for query: {query}")
                 return []
                 
             logger.info(f"Found {len(results)} results in direct search")
@@ -148,14 +155,14 @@ class RAGEngine:
             return nodes
             
         except Exception as e:
-            logger.error("Error in direct search", error=str(e), stack_trace=traceback.format_exc())
+            logger.error(f"Error in direct search: {str(e)}", exc_info=True)
             return []
     
     def _validate_condensed_question(self, original: str, condensed: str) -> str:
         """Validate the condensed question to ensure it meets quality standards."""
         # Check if condensed question is empty or too short
         if not condensed or len(condensed) < 5:
-            logger.warning("Condensed question too short or empty, using original")
+            logger.warning(f"Condensed question too short or empty, using original: '{condensed}'")
             return original
             
         # Simple dictionary check for common Italian words to detect typos
@@ -243,31 +250,32 @@ class RAGEngine:
         """Condense a follow-up question using conversation history."""
         # Se non c'è storia o la domanda è molto breve, non riformulare
         if not self.memory.is_follow_up_question() or len(question.split()) <= 3:
-            logger.info("Skipping condensation: no history or question too short")
+            logger.info(f"Skipping condensation: no history or question too short: '{question}'")
             return question
         
         try:
             # Prepara la storia della conversazione per il prompt
             chat_history_str = ""
+            # Utilizziamo TUTTA la storia recente, non solo le ultime 3 interazioni
+            # per assicurarci che le informazioni personali vengano mantenute
             history = self.memory.get_history()
             
             if not history:
                 logger.warning("No chat history available, using original question")
                 return question
             
-            # Usa solo le ultime 3 coppie di scambi per evitare token eccessivi
-            recent_history = history[-3:]
-            for q, a in recent_history:
+            # Elabora tutta la storia disponibile per catturare tutte le informazioni personali
+            for q, a in history:
                 chat_history_str += f"User: {q}\nAssistant: {a}\n\n"
             
-            logger.info(f"Using {len(recent_history)} recent exchanges for condensation")
+            logger.info(f"Using {len(history)} exchanges for condensation to preserve personal details")
             
             # Imposta una temperatura più bassa per risposte più deterministiche
             condensation_llm = OpenAI(
                 model=settings.LLM_MODEL,
                 api_key=settings.OPENAI_API_KEY,
                 temperature=0.0,
-                system_prompt="Sei un assistente specializzato nella riformulazione di domande in italiano. Riformula la domanda di follow-up in una domanda autonoma, completa e chiara. Mantieni l'ortografia corretta. La domanda riformulata DEVE essere una frase completa e grammaticalmente corretta."
+                system_prompt="Sei un assistente specializzato nella riformulazione di domande in italiano. Riformula la domanda di follow-up in una domanda autonoma, completa e chiara. Mantieni l'ortografia corretta. La domanda riformulata DEVE essere una frase completa e grammaticalmente corretta. ISTRUZIONE IMPORTANTE: Devi includere TUTTI i riferimenti a informazioni personali dell'utente (come nomi, preferenze, dettagli biografici) che sono stati menzionati in precedenza."
             )
             
             # Usa il prompt di condensazione
@@ -277,7 +285,7 @@ class RAGEngine:
             )
             
             messages = [
-                ChatMessage(role=MessageRole.SYSTEM, content="Riformula la domanda in modo chiaro e completo."),
+                ChatMessage(role=MessageRole.SYSTEM, content="Riformula la domanda in modo chiaro e completo. Includi sempre informazioni personali menzionate in precedenza."),
                 ChatMessage(role=MessageRole.USER, content=prompt_content)
             ]
             
@@ -298,7 +306,7 @@ class RAGEngine:
     
     def query(self, question: str) -> Dict[str, Any]:
         """Process a user query and generate a response using instance-specific memory."""
-        logger.info("Processing query with instance memory", question=question, memory_id=id(self.memory))
+        logger.info(f"Processing query with instance memory: '{question}'")
         
         try:
             # Check if initialization failed (flag set in __init__)
@@ -328,10 +336,13 @@ class RAGEngine:
                 
             # Check if we have any valid results
             if not valid_nodes:
-                logger.warning("No valid documents retrieved", question=condensed_question)
+                logger.warning(f"No valid documents retrieved for question: {condensed_question}")
                 # Use the no-context template
                 response_text = LlamaIndexSettings.llm.complete(
-                    self.no_context_prompt.format(question=condensed_question)
+                    self.no_context_prompt.format(
+                        question=condensed_question,
+                        chat_history="\n".join([f"User: {q}\nAssistant: {a}" for q, a in self.memory.get_history()])
+                    )
                 ).text
                 self.memory.add_exchange(question, response_text)
                 return {
@@ -349,7 +360,8 @@ class RAGEngine:
             # Generate response
             prompt = self.qa_prompt.format(
                 context=context_str,
-                question=condensed_question
+                question=condensed_question,
+                chat_history="\n".join([f"User: {q}\nAssistant: {a}" for q, a in self.memory.get_history()])
             )
             
             response_text = LlamaIndexSettings.llm.complete(prompt).text
@@ -380,7 +392,7 @@ class RAGEngine:
             }
             
         except Exception as e:
-            logger.error("Error processing query", error=str(e), stack_trace=traceback.format_exc())
+            logger.error(f"Error processing query: {str(e)}", exc_info=True)
             error_message = "Mi dispiace, si è verificato un errore durante l'elaborazione della tua richiesta. Riprova più tardi o contatta il supporto tecnico."
             self.memory.add_exchange(question, error_message)
             return {
@@ -394,19 +406,21 @@ class RAGEngine:
         try:
             if self.memory: # Check if memory object exists
                 self.memory.reset()
-                logger.info("Conversation memory reset for the current session", memory_id=id(self.memory))
+                logger.info(f"Conversation memory reset for the current session (memory ID: {id(self.memory)})")
             else:
                 logger.warning("Attempted to reset memory, but no memory object was found on RAGEngine instance.")
         except Exception as e:
-            logger.error("Error resetting memory", error=str(e))
+            logger.error(f"Error resetting memory: {str(e)}", exc_info=True)
     
     def get_transcript(self) -> List[Dict[str, str]]:
         """Get the conversation transcript for the current session."""
         try:
             if self.memory:
-                return self.memory.get_transcript()
+                transcript = self.memory.get_transcript()
+                logger.info(f"Retrieved transcript with {len(transcript)} exchanges")
+                return transcript
             logger.warning("Attempted to get transcript, but no memory object was found.")
             return []
         except Exception as e:
-            logger.error("Error getting transcript", error=str(e))
+            logger.error(f"Error getting transcript: {str(e)}", exc_info=True)
             return []

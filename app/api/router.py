@@ -25,21 +25,17 @@ session_memories: Dict[str, ConversationMemory] = {}
 
 def get_session_memory(session_id: Optional[str] = None) -> ConversationMemory:
     """Dependency to get or create session-specific conversation memory."""
-    # If no session_id is provided (e.g. for a new session from a client that doesn't send one initially),
-    # we could generate one, but for now, we rely on client sending it.
-    # For /query, session_id comes from QueryRequest. For /reset and /transcript, it comes from their respective requests.
     if not session_id:
-        # This case should ideally be handled by the client always sending a session_id.
-        # If RAGEngine is used without a session_id, it might default to a non-persistent memory.
-        # For simplicity in this refactor, we'll assume session_id is usually present when needed.
-        logger.warning("Accessing memory without a session_id. A default, non-persistent memory might be used or created.")
-        # Fallback to a new, temporary memory if no ID. This won't be persisted in session_memories.
+        logger.warning("Request received without session_id, creating temporary memory")
         return ConversationMemory()
 
     if session_id not in session_memories:
         logger.info(f"Creating new conversation memory for session_id: {session_id}")
         session_memories[session_id] = ConversationMemory()
-    return session_memories[session_id]
+        
+    memory = session_memories[session_id]
+    logger.debug(f"Retrieved memory for session_id: {session_id} (memory ID: {id(memory)})")
+    return memory
 
 # Dependency to get RAG engine, now aware of session-specific memory
 def get_rag_engine(session_memory: ConversationMemory = Depends(get_session_memory)) -> RAGEngine:
@@ -47,19 +43,16 @@ def get_rag_engine(session_memory: ConversationMemory = Depends(get_session_memo
     try:
         # Pass the session-specific memory to the RAGEngine
         engine = RAGEngine(memory=session_memory)
+        logger.debug(f"Created RAG engine with memory ID: {id(session_memory)}")
+        
         # Check for the internal failure flag set during RAGEngine init
         if hasattr(engine, '_initialization_failed') and engine._initialization_failed:
             logger.error("RAGEngine initialization failed (detected in get_rag_engine via flag)")
             # We can't raise HTTPException here directly as it's a dependency setup
-            # The endpoint using this engine should handle the failure flag if needed.
         return engine
     except Exception as e:
-        logger.error("Failed to initialize RAG engine in dependency", error=str(e))
-        # To allow the app to start and report errors, return a minimally functional engine
-        # The RAGEngine's own __init__ should set a failure flag if critical parts fail.
-        # This part is tricky; ideally, RAGEngine manages its own partial failure state.
-        # For now, we assume RAGEngine's __init__ handles its state properly.
-        # Fallback RAGEngine creation for extreme cases:
+        logger.error(f"Failed to initialize RAG engine in dependency: {str(e)}", exc_info=True)
+        # Create a minimally functional engine for error reporting
         engine = RAGEngine.__new__(RAGEngine) # Create instance without calling __init__
         setattr(engine, '_initialization_failed', True) # Manually set failure flag
         setattr(engine, 'memory', session_memory) # Assign the session memory
@@ -72,27 +65,27 @@ async def query(request: QueryRequest, rag_engine: RAGEngine = Depends(get_rag_e
     """Process a user query and return a response."""
     logger.info(f"Received query: '{request.query}', session_id: {request.session_id}")
     
-    # Ottieni la memoria specifica per questa sessione
+    # Get the memory specific to this session
     current_session_memory = get_session_memory(request.session_id)
     
-    # Log dello stato della memoria prima del caricamento
+    # Log the memory state before loading history
     logger.info(f"Memory before loading history: {len(current_session_memory.get_history())} exchanges")
     
-    # Carica lo storico della conversazione
+    # Load conversation history
     if request.conversation_history:
         logger.info(f"Loading {len(request.conversation_history)} items from client history")
         current_session_memory.load_history(request.conversation_history)
         logger.info(f"Memory after loading: {len(current_session_memory.get_history())} exchanges")
     
-    # Assicurati che RAGEngine usi questa memoria
+    # Make sure the RAG engine uses this memory
     rag_engine.memory = current_session_memory
     
-    # Processa la query
+    # Process the query
     try:
         result = rag_engine.query(request.query)
         return QueryResponse(**result)
     except Exception as e:
-        logger.error(f"Error processing query: {str(e)}")
+        logger.error(f"Error processing query: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Si è verificato un errore durante l'elaborazione della richiesta: {str(e)}"
@@ -100,20 +93,23 @@ async def query(request: QueryRequest, rag_engine: RAGEngine = Depends(get_rag_e
 
 
 @router.post("/reset", response_model=ResetResponse)
-async def reset(request: ResetRequest): # Removed rag_engine dependency for now
+async def reset(request: ResetRequest):
     """Reset the conversation memory for a given session_id."""
-    logger.info("Received reset request", session_id=request.session_id)
+    logger.info(f"Received reset request for session_id: {request.session_id}")
     
     if not request.session_id:
         raise HTTPException(status_code=400, detail="session_id is required for reset")
 
-    session_memory_instance = get_session_memory(request.session_id)
     try:
-        session_memory_instance.reset()
-        # Also remove from global store if you want a full reset beyond ConversationMemory's clear
+        # Get the memory for this session
         if request.session_id in session_memories:
+            # Reset the memory
+            session_memories[request.session_id].reset()
+            # Also remove from global store for a complete reset
             del session_memories[request.session_id]
-            logger.info(f"Cleared and removed memory for session_id: {request.session_id} from global store.")
+            logger.info(f"Reset and removed memory for session_id: {request.session_id}")
+        else:
+            logger.warning(f"Reset requested for non-existent session_id: {request.session_id}")
         
         return ResetResponse(
             success=True,
@@ -121,7 +117,7 @@ async def reset(request: ResetRequest): # Removed rag_engine dependency for now
         )
     
     except Exception as e:
-        logger.error("Error resetting conversation", error=str(e), session_id=request.session_id)
+        logger.error(f"Error resetting conversation: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Si è verificato un errore durante il reset della conversazione: {str(e)}"
@@ -129,36 +125,40 @@ async def reset(request: ResetRequest): # Removed rag_engine dependency for now
 
 
 @router.get("/transcript", response_model=TranscriptResponse)
-async def transcript(session_id: Optional[str] = Body(None, embed=True)): # Get session_id from request body or query param
+async def transcript(session_id: Optional[str] = None):
     """Get the conversation transcript for a given session_id."""
-    logger.info("Received transcript request", session_id=session_id)
+    logger.info(f"Received transcript request for session_id: {session_id}")
+    
+    # Il frontend sta chiamando questo endpoint senza session_id
+    # Prova a usare i cookie o l'ultimo session_id attivo
+    if not session_id and session_memories:
+        # Usa l'ultimo session_id attivo come fallback
+        active_sessions = list(session_memories.keys())
+        if active_sessions:
+            session_id = active_sessions[-1]
+            logger.info(f"No session_id provided, using last active session: {session_id}")
 
     if not session_id:
-        # If client doesn't send session_id, we can't provide a specific transcript.
-        # Return empty or error.
-        logger.warning("Transcript requested without session_id.")
-        return TranscriptResponse(transcript=[]) # Or raise HTTPException
+        logger.warning("No session_id provided and no active sessions found")
+        return TranscriptResponse(transcript=[])
 
-    session_memory_instance = get_session_memory(session_id)
     try:
-        transcript_data = session_memory_instance.get_transcript()
-        return TranscriptResponse(transcript=transcript_data)
+        if session_id in session_memories:
+            transcript_data = session_memories[session_id].get_transcript()
+            logger.info(f"Returning transcript with {len(transcript_data)} exchanges for session_id: {session_id}")
+            return TranscriptResponse(transcript=transcript_data)
+        else:
+            logger.warning(f"Transcript requested for non-existent session_id: {session_id}")
+            return TranscriptResponse(transcript=[])
     
     except Exception as e:
-        logger.error("Error retrieving transcript", error=str(e), session_id=session_id)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Si è verificato un errore durante il recupero della trascrizione: {str(e)}"
-        )
+        logger.error(f"Error retrieving transcript: {str(e)}", exc_info=True)
+        return TranscriptResponse(transcript=[])
 
 
 @router.get("/contact", response_model=ContactResponse)
 async def contact():
-    """Get the CRI contact information.
-    
-    Returns:
-        The CRI contact information
-    """
+    """Get the CRI contact information."""
     logger.info("Received contact information request")
     
     try:
@@ -179,7 +179,7 @@ async def contact():
         )
     
     except Exception as e:
-        logger.error("Error retrieving contact information", error=str(e))
+        logger.error(f"Error retrieving contact information: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Si è verificato un errore durante il recupero delle informazioni di contatto: {str(e)}"

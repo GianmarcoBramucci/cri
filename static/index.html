@@ -562,36 +562,81 @@
       }
     }
     
-    // Gestione dell'invio del messaggio
-    queryForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const query = queryInput.value.trim();
-      if (!query || isLoading) return;
-      
-      // Aggiungi il messaggio dell'utente alla chat
-      addMessage(query, true);
-      conversationHistory.push({ type: "user", content: query });
-      
-      // Pulisci l'input
-      queryInput.value = '';
-      
-      // Imposta lo stato di caricamento
-      isLoading = true;
-      showChatLoader();
-      
+    // Funzione per inviare una domanda al backend - VERSIONE AGGIORNATA
+    async function sendQuestion(question) {
       try {
-        // Chiama l'API per ottenere la risposta
+        // Verifica che ci sia una sessione
+        if (!sessionId) {
+          console.error("sessionId non definito in sendQuestion");
+          return;
+        }
+        
+        // Mostra l'indicatore di digitazione
+        showChatLoader();
+        
+        // Costruisci la cronologia della conversazione da inviare al backend
+        // Questo è fondamentale per garantire che tutte le informazioni personali vengano incluse
+        const conversationHistory = [];
+        const messages = document.querySelectorAll('.chat-message');
+        
+        messages.forEach(msg => {
+          const isBot = msg.classList.contains('assistant-message');
+          let content = "";
+          
+          if (isBot) {
+            // Per i messaggi del bot, estrai solo il contenuto principale (no timestamp)
+            // Rimuovi elementi che non sono parte del contenuto principale
+            let msgText = msg.innerHTML;
+            
+            // Rimuovi la parte delle fonti se presente
+            const sourcesDiv = msg.querySelector('.sources-info');
+            if (sourcesDiv) {
+              msgText = msgText.replace(sourcesDiv.outerHTML, '');
+            }
+            
+            // Rimuovi il timestamp se presente
+            const timeDiv = msg.querySelector('.message-time');
+            if (timeDiv) {
+              msgText = msgText.replace(timeDiv.outerHTML, '');
+            }
+            
+            // Converti il contenuto HTML in testo
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = msgText;
+            content = tempDiv.textContent.trim();
+          } else {
+            // Per i messaggi utente, estrai il contenuto principale (no timestamp)
+            content = msg.textContent.trim();
+            
+            // Rimuovi il timestamp se presente
+            const timeDiv = msg.querySelector('.message-time');
+            if (timeDiv) {
+              content = content.replace(timeDiv.textContent, '').trim();
+            }
+          }
+          
+          // Aggiungi alla cronologia solo se c'è contenuto valido
+          if (content) {
+            conversationHistory.push({
+              type: isBot ? "assistant" : "user",
+              content: content
+            });
+          }
+        });
+        
+        console.log("Inviando cronologia completa:", conversationHistory);
+        
+        // Chiamata API al backend
         const response = await fetch(`${API_BASE_URL}/query`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            query: query,
+            query: question,
             session_id: sessionId,
-            conversation_history: conversationHistory
-          }),
+            conversation_history: conversationHistory  // Invio della cronologia completa
+          })
         });
         
         const data = await response.json();
@@ -615,7 +660,7 @@
                 <div class="font-medium text-gray-700">Debug - Riformulazione:</div>
                 <div class="flex">
                   <div class="font-mono mr-2">Originale:</div>
-                  <div class="text-gray-700">${query}</div>
+                  <div class="text-gray-700">${question}</div>
                 </div>
                 <div class="flex">
                   <div class="font-mono mr-2">Riformulata:</div>
@@ -627,7 +672,7 @@
             }
             
             // Richiedi la trascrizione per mostrare la memoria della conversazione
-            fetch(`${API_BASE_URL}/transcript`)
+            fetch(`${API_BASE_URL}/transcript?session_id=${sessionId}`)
               .then(response => response.json())
               .then(transcriptData => {
                 if (transcriptData.transcript) {
@@ -656,6 +701,27 @@
       }
       
       isLoading = false;
+    }
+    
+    // Gestione dell'invio del messaggio
+    queryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const query = queryInput.value.trim();
+      if (!query || isLoading) return;
+      
+      // Aggiungi il messaggio dell'utente alla chat
+      addMessage(query, true);
+      conversationHistory.push({ type: "user", content: query });
+      
+      // Pulisci l'input
+      queryInput.value = '';
+      
+      // Imposta lo stato di caricamento
+      isLoading = true;
+      
+      // Invia la domanda al backend
+      await sendQuestion(query);
     });
     
     // Gestione del reset della conversazione
@@ -695,7 +761,7 @@
       transcriptModal.classList.remove('hidden');
       
       try {
-        const response = await fetch(`${API_BASE_URL}/transcript`);
+        const response = await fetch(`${API_BASE_URL}/transcript?session_id=${sessionId}`);
         const data = await response.json();
         
         if (response.ok && data.transcript) {
