@@ -966,19 +966,119 @@
         });
         
         // Chiamata API al backend
+        const requestData = {
+          query: question,
+          session_id: activeSessionId,
+          conversation_history: conversationHistory,
+          include_prompt: true // Richiediamo il prompt completo
+        };
+        
+        // Visualizza il contesto che viene inviato al backend
+        console.log("Contesto inviato al backend:", requestData);
+        
         const response = await fetch(`${API_BASE_URL}/query`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            query: question,
-            session_id: activeSessionId,
-            conversation_history: conversationHistory
-          })
+          body: JSON.stringify(requestData)
         });
         
         const data = await response.json();
+        
+        // Log iniziale più evidente che indica l'inizio dell'analisi
+        console.log('%c🔍 ANALISI RAG PER LA QUERY: "' + question + '"', 
+            'color: white; background-color: #0066cc; font-weight: bold; font-size: 16px; padding: 8px 12px; margin: 5px 0; border-radius: 4px; text-align: center; display: block;');
+        
+        // Visualizza la risposta completa per debugging
+        console.log("Risposta completa dal backend:", data);
+        
+        // Visualizzazione stilizzata dei chunks utilizzati per la risposta
+        if (data.source_documents && data.source_documents.length > 0) {
+          console.log(`%c📚 ${data.source_documents.length} chunks utilizzati per generare la risposta:`, 'color: #e3000f; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 1px rgba(0,0,0,0.2); background-color: #ffeeee; padding: 5px 10px; border-radius: 4px; border-left: 4px solid #e3000f;');
+          
+          data.source_documents.forEach((doc, index) => {
+            console.group(`%c📄 Chunk #${index + 1}`, 'color: #e3000f; font-weight: bold; font-size: 14px; background-color: #fff5f5; padding: 3px 8px; border-radius: 3px;');
+            
+            // Prova a mostrare il testo completo senza troncamento
+            let foundText = false;
+            
+            // Cerca nei campi di testo comuni
+            const textFields = ['text', 'page_content', 'content'];
+            for (const field of textFields) {
+              if (doc[field]) {
+                console.log(`%c📝 Testo completo:`, 'color: #333; background-color: #f9f9f9; font-weight: bold; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #666;');
+                
+                // Visualizza in un box formattato per leggibilità
+                console.log('%c' + doc[field], 'background-color: #f8f8f8; color: #222; padding: 12px; border-radius: 6px; display: block; white-space: pre-wrap; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; font-family: "Consolas", monospace; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);');
+                foundText = true;
+                break;  // Se troviamo un campo, usciamo dal ciclo
+              }
+            }
+            
+            // Se non è stato trovato in nessun campo, prova a cercare il testo in modo ricorsivo
+            if (!foundText) {
+              console.log(`%c🔍 Ricerca testo nei campi disponibili...`, 'color: #0066cc; font-weight: bold;');
+              
+              const findTextRecursively = (obj, path = '') => {
+                for (const key in obj) {
+                  if (typeof obj[key] === 'string' && obj[key].length > 100) {
+                    console.log(`%c📃 Testo trovato in '${path}${key}':`, 'color: #333; background-color: #f0f8ff; font-weight: bold; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #0066cc;');
+                    console.log('%c' + obj[key], 'background-color: #f8f8f8; color: #222; padding: 12px; border-radius: 6px; display: block; white-space: pre-wrap; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; font-family: "Consolas", monospace; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);');
+                    foundText = true;
+                    return;
+                  } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                    findTextRecursively(obj[key], `${path}${key}.`);
+                    if (foundText) return;  // Se abbiamo trovato un testo, interrompiamo la ricorsione
+                  }
+                }
+              };
+              
+              findTextRecursively(doc);
+              
+              if (!foundText) {
+                console.log(`%c❌ Nessun testo trovato in questo documento`, 'color: #999; font-style: italic;');
+                console.log(doc);  // Mostra comunque l'oggetto completo
+              }
+            }
+            
+            // Visualizza i metadati (filename, etc)
+            if (doc.metadata) {
+              console.log(`%c📋 Metadati:`, 'color: #333; background-color: #f0f8ff; font-weight: bold; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #0066cc;');
+              
+              try {
+                // Crea una versione formattata dei metadati
+                const metadataTable = {};
+                for (const key in doc.metadata) {
+                  const value = doc.metadata[key];
+                  metadataTable[key] = typeof value === 'string' && value.length > 100 
+                    ? value.substring(0, 100) + '...' 
+                    : value;
+                }
+                console.table(metadataTable);
+              } catch (e) {
+                console.log(doc.metadata);  // Fallback in caso di errore
+              }
+            }
+            
+            console.groupEnd();
+          });
+        } else {
+          console.log("%c❌ Nessun chunk RAG utilizzato per questa risposta", "color: #e3000f; font-weight: bold; background-color: #ffeeee; padding: 5px 10px; border-radius: 4px;");
+        }
+        
+        // Visualizza la query condensata/riformulata se presente
+        if (data.condensed_question) {
+          console.log(`%c🔍 Query riformulata: "${data.condensed_question}"`, 'color: #0066cc; font-weight: bold; background-color: #f0f8ff; padding: 5px 10px; border-radius: 4px; border-left: 4px solid #0066cc;');
+        }
+        
+        // Visualizza il prompt completo se presente
+        if (data.full_prompt) {
+          console.log(`%c📝 Prompt completo utilizzato:`, 'color: #6a0dad; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 1px rgba(0,0,0,0.2); background-color: #f8f4ff; padding: 5px 10px; border-radius: 4px; border-left: 4px solid #6a0dad;');
+          console.log('%c' + data.full_prompt, 'background-color: #f8f4ff; color: #222; padding: 15px; border-radius: 6px; display: block; white-space: pre-wrap; max-height: 400px; overflow-y: auto; border: 1px solid #d4c6e7; font-family: "Consolas", monospace; box-shadow: inset 0 0 10px rgba(106,13,173,0.1); line-height: 1.4;');
+        } else {
+          console.log(`%c❌ Prompt completo non disponibile nella risposta`, 'color: #6a0dad; font-weight: bold; background-color: #f8f4ff; padding: 5px 10px; border-radius: 4px;');
+        }
         
         // Simula un piccolo ritardo per una UX più naturale
         setTimeout(() => {

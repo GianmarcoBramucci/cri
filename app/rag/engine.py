@@ -304,7 +304,7 @@ class RAGEngine:
             logger.error(f"Error condensing question: {str(e)}")
             return question
     
-    def query(self, question: str) -> Dict[str, Any]:
+    def query(self, question: str, include_prompt: bool = False) -> Dict[str, Any]:
         """Process a user query and generate a response using instance-specific memory."""
         logger.info(f"Processing query with instance memory: '{question}'")
         
@@ -338,18 +338,24 @@ class RAGEngine:
             if not valid_nodes:
                 logger.warning(f"No valid documents retrieved for question: {condensed_question}")
                 # Use the no-context template
-                response_text = LlamaIndexSettings.llm.complete(
-                    self.no_context_prompt.format(
-                        question=condensed_question,
-                        chat_history="\n".join([f"User: {q}\nAssistant: {a}" for q, a in self.memory.get_history()])
-                    )
-                ).text
+                prompt = self.no_context_prompt.format(
+                    question=condensed_question,
+                    chat_history="\n".join([f"User: {q}\nAssistant: {a}" for q, a in self.memory.get_history()])
+                )
+                response_text = LlamaIndexSettings.llm.complete(prompt).text
                 self.memory.add_exchange(question, response_text)
-                return {
+                
+                result = {
                     "answer": response_text,
                     "source_documents": [],
                     "condensed_question": condensed_question,
                 }
+                
+                # Include il prompt completo se richiesto
+                if include_prompt:
+                    result["full_prompt"] = prompt
+                
+                return result
             
             # Create context string from retrieved nodes
             context_str = "\n\n".join([
@@ -385,11 +391,17 @@ class RAGEngine:
             
             logger.info("Query processed successfully")
             
-            return {
+            result = {
                 "answer": response_text,
                 "source_documents": source_docs,
                 "condensed_question": condensed_question,
             }
+            
+            # Include il prompt completo se richiesto
+            if include_prompt:
+                result["full_prompt"] = prompt
+            
+            return result
             
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}", exc_info=True)

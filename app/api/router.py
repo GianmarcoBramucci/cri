@@ -82,7 +82,7 @@ async def query(request: QueryRequest, rag_engine: RAGEngine = Depends(get_rag_e
     
     # Process the query
     try:
-        result = rag_engine.query(request.query)
+        result = rag_engine.query(request.query, include_prompt=request.include_prompt)
         return QueryResponse(**result)
     except Exception as e:
         logger.error(f"Error processing query: {str(e)}", exc_info=True)

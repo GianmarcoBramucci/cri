@@ -13,6 +13,10 @@ class QueryRequest(BaseModel):
         default_factory=list, 
         description="Full conversation history from the client"
     )
+    include_prompt: Optional[bool] = Field(
+        False,
+        description="Whether to include the full prompt in the response"
+    )
     
     class Config:
         json_schema_extra = {
@@ -34,6 +38,10 @@ class QueryResponse(BaseModel):
     condensed_question: Optional[str] = Field(
         None, 
         description="The condensed version of the question if it was a follow-up"
+    )
+    full_prompt: Optional[str] = Field(
+        None,
+        description="The full prompt used to generate the answer"
     )
     
     class Config:
