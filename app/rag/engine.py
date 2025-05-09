@@ -34,11 +34,14 @@ logger = get_logger(__name__)
 class RAGEngine:
     """RAG Engine for the CroceRossa Qdrant Cloud application."""
     
-    def __init__(self, memory: ConversationMemory):
-        """Initialize the RAG engine with the required components and a specific memory instance."""
-        logger.info("Initializing RAG Engine with provided memory instance")
+    def __init__(self, memory: ConversationMemory = None):
+        """Initialize the RAG engine with the required components and an optional memory instance."""
+        logger.info("Initializing RAG Engine" + (" with provided memory instance" if memory else ""))
         self._initialization_failed = False # Initialize the flag
-        self.memory = memory # Use the provided session-specific memory instance
+        
+        # Use the provided memory instance or create a new one
+        self.memory = memory or ConversationMemory()
+        
         self._qdrant_initialized = False  # Track Qdrant initialization
         
         try:
@@ -70,7 +73,7 @@ class RAGEngine:
             self._initialization_failed = True
     
     def _initialize_qdrant(self) -> None:
-        """Initialize connection to Qdrant and set up the vector store."""
+        """Initialize connection to Qdrant and set up the vector store with Cohere reranker."""
         # Skip if already initialized to prevent multiple connections
         if self._qdrant_initialized:
             logger.debug("Qdrant already initialized, skipping")
@@ -103,9 +106,20 @@ class RAGEngine:
                 similarity_top_k=settings.RETRIEVAL_TOP_K,
             )
             
-            # TEMPORARY: Skip using Cohere reranker due to compatibility issues
-            self.use_reranker = False
-            logger.info("Cohere reranker disabled for compatibility")
+            # Initialize and enable Cohere reranker
+            try:
+                logger.info(f"Initializing Cohere reranker with top_k={settings.RERANK_TOP_K}")
+                self.reranker = CohereRerank(
+                    api_key=settings.COHERE_API_KEY,
+                    top_n=settings.RERANK_TOP_K,
+                    model_name="rerank-multilingual-v2.0"  # Supporta anche l'italiano
+                )
+                self.use_reranker = True
+                logger.info("Cohere reranker initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize Cohere reranker: {str(e)}", exc_info=True)
+                self.use_reranker = False
+                logger.warning("Cohere reranker disabled due to initialization failure")
             
             logger.info("Qdrant and retrievers initialized successfully")
             self._qdrant_initialized = True
@@ -304,6 +318,30 @@ class RAGEngine:
             logger.error(f"Error condensing question: {str(e)}")
             return question
     
+    def _apply_reranking(self, query: str, nodes: List[TextNode]) -> List[TextNode]:
+        """Applica il reranking ai nodi recuperati utilizzando Cohere."""
+        if not self.use_reranker or not hasattr(self, 'reranker') or len(nodes) <= 1:
+            logger.info("Skipping reranking: reranker disabled or not applicable")
+            return nodes
+            
+        try:
+            logger.info(f"Applying Cohere reranking to {len(nodes)} nodes")
+            
+            # Applica il reranker di Cohere
+            reranked_nodes = self.reranker.postprocess(nodes, query_str=query)
+            
+            if reranked_nodes:
+                logger.info(f"Successfully reranked nodes, keeping top {len(reranked_nodes)} of {len(nodes)}")
+                return reranked_nodes
+            else:
+                logger.warning("Reranking returned empty results, using original nodes")
+                return nodes
+                
+        except Exception as e:
+            logger.error(f"Error during reranking: {str(e)}", exc_info=True)
+            # In caso di errore, torna ai nodi originali
+            return nodes
+    
     def query(self, question: str, include_prompt: bool = False) -> Dict[str, Any]:
         """Process a user query and generate a response using instance-specific memory."""
         logger.info(f"Processing query with instance memory: '{question}'")
@@ -356,6 +394,11 @@ class RAGEngine:
                     result["full_prompt"] = prompt
                 
                 return result
+            
+            # Applica il reranking ai nodi recuperati
+            if self.use_reranker and len(valid_nodes) > 1:
+                valid_nodes = self._apply_reranking(condensed_question, valid_nodes)
+                logger.info(f"Using {len(valid_nodes)} nodes after reranking")
             
             # Create context string from retrieved nodes
             context_str = "\n\n".join([
